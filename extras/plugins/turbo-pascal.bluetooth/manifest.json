@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "turbo-pascal.bluetooth",
+  "name": "Turbo Pascal Bluetooth",
+  "version": "1.0.0",
+  "author": "Omarchy; Turbo Pascal adaptations by keylimesoda",
+  "description": "Bluetooth device list with connect/disconnect",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "Panel.qml"
+  },
+  "barWidget": {
+    "displayName": "Turbo Pascal Bluetooth",
+    "description": "Bluetooth device list with connect/disconnect",
+    "category": "Network",
+    "allowMultiple": false
+  },
+  "omarchy": {
+    "clonedFrom": "omarchy.bluetooth"
+  }
+}

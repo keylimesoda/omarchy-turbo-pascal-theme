@@ -1,0 +1,4 @@
+#!/bin/bash
+# Omarchy theme-set and post-boot entry point.
+set -euo pipefail
+exec bash "$HOME/.local/share/omarchy-turbo-pascal/apply-borders" "$@"

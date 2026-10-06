@@ -1,0 +1,37 @@
+mode = "dark"
+
+accent = "#55FFFF"
+selection = "#AAAAAA"
+selection_background = "#AAAAAA"
+selection_foreground = "#0000AA"
+muted = "#AAAAAA"
+
+background = "#0000AA"
+dark_background = "#000088"
+darker_background = "#000066"
+lighter_background = "#0000CC"
+
+foreground = "#FFFFFF"
+dark_foreground = "#AAAAAA"
+light_foreground = "#FFFFFF"
+bright_foreground = "#FFFFFF"
+
+hyprland_active_border = "rgba(ffffffff)"
+hyprland_inactive_border = "rgba(aaaaaaff)"
+
+# Bright ANSI colors keep command output readable on the DOS-blue surface.
+red = "#FF5555"
+yellow = "#FFFF55"
+orange = "#FFAA55"
+green = "#55FF55"
+cyan = "#55FFFF"
+blue = "#55FFFF"
+magenta = "#FF55FF"
+brown = "#AA5500"
+
+bright_red = "#FF5555"
+bright_yellow = "#FFFF55"
+bright_green = "#55FF55"
+bright_cyan = "#55FFFF"
+bright_blue = "#55FFFF"
+bright_magenta = "#FF55FF"

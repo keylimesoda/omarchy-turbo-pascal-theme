@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "turbo-pascal.clock",
+  "name": "Turbo Pascal Clock",
+  "version": "1.0.0",
+  "author": "Omarchy; Turbo Pascal adaptations by keylimesoda",
+  "description": "Date/time label with a calendar popup",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Turbo Pascal Clock",
+    "description": "Date/time label with a calendar popup",
+    "category": "Time",
+    "allowMultiple": false
+  },
+  "omarchy": {
+    "clonedFrom": "omarchy.clock"
+  }
+}

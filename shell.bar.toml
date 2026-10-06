@@ -1,0 +1,9 @@
+[bar]
+background = "#AAAAAA"
+background-alpha = 1.0
+text = "#000000"
+active = "#AA0000"
+open-panel-indicator = "#00AA00"
+scale-with-font = true
+size-horizontal = 26
+size-vertical = 28

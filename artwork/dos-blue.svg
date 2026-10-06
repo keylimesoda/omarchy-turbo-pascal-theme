@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+  <rect width="960" height="540" fill="#0000AA"/>
+  <g fill="none" stroke="#00AAAA" stroke-width="1" shape-rendering="crispEdges">
+    <rect x="36.5" y="36.5" width="887" height="467"/>
+    <rect x="39.5" y="39.5" width="881" height="461"/>
+  </g>
+  <g fill="#0000AA">
+    <rect x="426" y="30" width="108" height="14"/>
+    <rect x="441" y="494" width="78" height="14"/>
+  </g>
+  <g font-family="DejaVu Sans Mono, monospace" font-size="10" text-anchor="middle">
+    <text x="480" y="40" fill="#55FFFF">TURBO PASCAL</text>
+    <text x="480" y="504" fill="#AAAAAA">Ln 1 Col 1</text>
+  </g>
+  <g font-family="DejaVu Sans Mono, monospace" font-size="12" fill="#FFFF55">
+    <text x="428" y="253">begin</text>
+    <text x="428" y="287">end.</text>
+  </g>
+  <rect x="444" y="267" width="7" height="2" fill="#FFFFFF"/>
+</svg>

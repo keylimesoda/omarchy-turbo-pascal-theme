@@ -1,0 +1,76 @@
+diff --git a/borders-plus-plus/borderDeco.cpp b/borders-plus-plus/borderDeco.cpp
+index dc361eb..e215929 100644
+--- a/borders-plus-plus/borderDeco.cpp
++++ b/borders-plus-plus/borderDeco.cpp
+@@ -4,6 +4,7 @@
+ 
+ #include <hyprland/src/Compositor.hpp>
+ #include <hyprland/src/desktop/view/Window.hpp>
++#include <hyprland/src/desktop/state/FocusState.hpp>
+ #include <hyprland/src/render/Renderer.hpp>
+ #include <hyprutils/memory/Casts.hpp>
+ using namespace Hyprutils::Memory;
+@@ -70,6 +71,8 @@ void CBordersPlusPlus::draw(PHLMONITOR pMonitor, const float& a) {
+ 
+     if (!PWINDOW->m_ruleApplicator->decorate().valueOrDefault())
+         return;
++    if (vars.activeOnly->value() && Desktop::focusState()->window() != PWINDOW)
++        return;
+ 
+     CBorderPPPassElement::SBorderPPData data;
+     data.deco = this;
+diff --git a/borders-plus-plus/globals.hpp b/borders-plus-plus/globals.hpp
+index 8c2c707..d238fc7 100644
+--- a/borders-plus-plus/globals.hpp
++++ b/borders-plus-plus/globals.hpp
+@@ -12,6 +12,7 @@ inline HANDLE PHANDLE = nullptr;
+ struct SVars {
+     SP<Config::Values::CIntValue>                  addBorders;
+     SP<Config::Values::CBoolValue>                 naturalRounding;
++    SP<Config::Values::CBoolValue>                 activeOnly;
+     std::array<SP<Config::Values::CColorValue>, 9> borderColors;
+     std::array<SP<Config::Values::CIntValue>, 9>   borderSizes;
+ };
+diff --git a/borders-plus-plus/main.cpp b/borders-plus-plus/main.cpp
+index bae756c..b94a36e 100644
+--- a/borders-plus-plus/main.cpp
++++ b/borders-plus-plus/main.cpp
+@@ -7,6 +7,7 @@
+ #include <hyprland/src/Compositor.hpp>
+ #include <hyprland/src/desktop/view/Window.hpp>
+ #include <hyprland/src/desktop/state/WindowState.hpp>
++#include <hyprland/src/desktop/state/FocusState.hpp>
+ #include <hyprland/src/config/ConfigManager.hpp>
+ #include <hyprland/src/render/Renderer.hpp>
+ #include <hyprland/src/event/EventBus.hpp>
+@@ -41,9 +42,11 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
+     vars.addBorders =
+         makeShared<Config::Values::CIntValue>("plugin:borders-plus-plus:add_borders", "How many extra borders to draw", 1, Config::Values::SIntValueOptions{.min = 0, .max = 9});
+     vars.naturalRounding = makeShared<Config::Values::CBoolValue>("plugin:borders-plus-plus:natural_rounding", "Use the window's original rounding", true);
++    vars.activeOnly = makeShared<Config::Values::CBoolValue>("plugin:borders-plus-plus:active_only", "Draw extra borders only on the focused window", false);
+ 
+     HyprlandAPI::addConfigValueV2(PHANDLE, vars.addBorders);
+     HyprlandAPI::addConfigValueV2(PHANDLE, vars.naturalRounding);
++    HyprlandAPI::addConfigValueV2(PHANDLE, vars.activeOnly);
+ 
+     static std::array<std::string, 9> borderColorNames;
+     static std::array<std::string, 9> borderSizeNames;
+@@ -62,6 +65,18 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
+     HyprlandAPI::reloadConfig();
+ 
+     static auto P = Event::bus()->m_events.window.open.listen([&](PHLWINDOW w) { onNewWindow(w); });
++    static auto F = Event::bus()->m_events.window.active.listen([](PHLWINDOW, Desktop::eFocusReason) {
++        if (!vars.activeOnly->value())
++            return;
++        for (const auto& window : Desktop::windowState()->windows()) {
++            if (!validMapped(window) || window->isHidden())
++                continue;
++            for (const auto& decoration : window->m_windowDecorations) {
++                if (decoration->getDisplayName() == "Borders++")
++                    decoration->damageEntire();
++            }
++        }
++    });
+ 
+     // add deco to existing windows
+     for (auto& w : Desktop::windowState()->windows()) {

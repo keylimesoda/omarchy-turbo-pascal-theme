@@ -1,0 +1,9 @@
+*.so
+*.o
+__pycache__/
+*.pyc
+.DS_Store
+/validation/
+/screenshots/
+/*widget*.png
+/*validation*.png

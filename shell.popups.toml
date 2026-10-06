@@ -1,0 +1,19 @@
+[popups]
+background = "#AAAAAA"
+background-alpha = 1.0
+text = "#000000"
+border = "#FFFFFF"
+border-alpha = 1.0
+border-width = 1
+inner-border = "#FFFFFF"
+inner-border-gap = 1
+button-background = "#008800"
+button-text = "#FFFFFF"
+button-hover-background = "#007700"
+button-selected-background = "#006600"
+button-pressed-background = "#005500"
+button-shadow-color = "#000000"
+button-shadow-offset = 2
+button-inset-shadow-color = "#003300"
+shadow-color = "#000000"
+shadow-offset = 4

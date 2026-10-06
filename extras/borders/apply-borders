@@ -1,0 +1,78 @@
+#!/bin/bash
+set -euo pipefail
+
+data="$HOME/.local/share/omarchy-turbo-pascal"
+source_dir="$data/hyprland-plugins/borders-plus-plus"
+plugin="$source_dir/borders-plus-plus.so"
+session_file="$data/plugin-session"
+session="${HYPRLAND_INSTANCE_SIGNATURE:?Run this inside your Hyprland session}"
+
+report_error() {
+  printf 'Turbo Pascal borders: failed at line %s. See the command output above.\n' "$1" >&2
+  if command -v omarchy-notification-send >/dev/null; then
+    omarchy-notification-send "Turbo Pascal borders failed" \
+      "Check Hyprland compatibility and run the installed apply-borders script in a terminal." ||
+      printf 'Could not send the border failure notification.\n' >&2
+  fi
+}
+trap 'report_error "$LINENO"' ERR
+
+check_version() {
+  local version headers
+  version=$(hyprctl version -j | jq -er '.version')
+  headers=$(pkg-config --modversion hyprland)
+  if [[ $version != 0.56.2 || $headers != "$version" ]]; then
+    printf 'Supported Hyprland: 0.56.2 with matching headers; compositor=%s, headers=%s.\n' \
+      "$version" "$headers" >&2
+    return 1
+  fi
+}
+
+if [[ ${1:-} == --build ]]; then
+  check_version
+  make -s -C "$source_dir"
+  exit 0
+fi
+
+loaded=$(hyprctl plugins list -j | jq -er 'any(.[]; .name == "borders-plus-plus") | tostring')
+owned=false
+if [[ -f $session_file && $(<"$session_file") == "$session" ]]; then
+  owned=true
+fi
+
+if [[ ${1:-} == --unload ]]; then
+  if [[ $loaded == true && $owned == true ]]; then
+    hyprctl plugin unload "$plugin"
+  fi
+  rm -f -- "$session_file"
+  exit 0
+fi
+
+theme=$(<"$HOME/.local/state/omarchy/current/theme.name")
+if [[ $theme != turbo-pascal ]]; then
+  if [[ $loaded == true && $owned == true ]]; then
+    hyprctl plugin unload "$plugin"
+  fi
+  rm -f -- "$session_file"
+  exit 0
+fi
+
+check_version
+if [[ $loaded == true && $owned != true ]]; then
+  printf 'Another borders-plus-plus plugin is loaded; refusing to replace it.\n' >&2
+  exit 1
+fi
+
+# Explicit installation authorizes this Lua; normal Git theme staging omits it.
+install -m 644 "$data/hyprland.lua" "$HOME/.local/state/omarchy/current/theme/hyprland.lua"
+if [[ $loaded != true ]]; then
+  make -s -C "$source_dir"
+  hyprctl plugin load "$plugin"
+  printf '%s\n' "$session" >"$session_file"
+fi
+hyprctl reload
+errors=$(hyprctl configerrors)
+if [[ -n $errors ]]; then
+  printf '%s\n' "$errors" >&2
+  exit 1
+fi

@@ -1,0 +1,24 @@
+[controls]
+# Resolve against each control's foreground, not the terminal's yellow text.
+normal-color = "foreground"
+normal-fill-alpha = 0.04
+normal-border-width = 1
+normal-border-alpha = 0.8
+
+hover-cursor-color = "foreground"
+hover-cursor-fill-alpha = 0.08
+hover-cursor-border-width = 1
+hover-cursor-border-alpha = 1.0
+
+focus-color = "foreground"
+focus-fill-alpha = 0.08
+focus-border-width = 1
+focus-border-alpha = 1.0
+
+selected-color = "foreground"
+selected-fill-alpha = 0.18
+selected-border-width = 1
+selected-border-alpha = 1.0
+
+pressed-fill-alpha = 0.22
+selection-fill-alpha = 0.35
