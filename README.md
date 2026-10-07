@@ -27,56 +27,54 @@ cd ~/.config/omarchy/themes/turbo-pascal
 ./install.sh
 ```
 
-**Remove extras:** run `./uninstall.sh` from the same folder. The theme stays.
-
 Run without sudo. Incompatible extras are skipped; replacing custom widgets
 requires your permission.
 
-### Theme or extras?
+## Uninstall extras
 
-| Base theme: standard Omarchy install | Optional extension: separate script |
-|---|---|
-| Terminal and application palettes | Double-line focused-window borders |
-| Gray bar, popup and menu colors | Double-white widget frames and black shadows |
-| Supported shell control colors/states | Raised/recessed green buttons with white labels |
-| Ordinary white/gray window border colors | 17% inactive dimming and 275 ms focus fades |
-| All seventeen static wallpapers | 97% target opacity for ordinary inactive windows |
+Run without sudo:
 
-The base uses `colors.toml` and `shell.*.toml`; Omarchy generates the application
-configs. Custom widgets receive the colors they support, not an automatic
-redesign. The extension replaces supported stock components with styled clones.
+```bash
+cd ~/.config/omarchy/themes/turbo-pascal
+./uninstall.sh
+```
+
+This removes the extras and restores your previous shell settings. **The base
+theme stays installed.**
 
 ## What's included
 
-- A deep DOS-blue terminal, white text, yellow emphasis, and readable cyan
-  directory names. ANSI blue is mapped to dark cyan (`#00AAAA`), while bright
-  blue stays bright cyan (`#55FFFF`). ANSI green
-  becomes bright yellow (`#FFFF55`) for the Omarchy terminal logo and update
-  headings, while bright green stays green (`#55FF55`). ANSI yellow remains
-  yellow, and bright yellow becomes bright orange (`#FFAA55`). Other normal
-  green-coded terminal output also shifts to yellow; widget buttons keep their
-  independently configured green fills.
-- Gray widget panels with black text, double-white frames, and crisp black
-  drop-shadows.
-- Green buttons with white labels. Selected buttons are darker and recessed;
-  unselected buttons have a small offset shadow.
-- Gray menus with green selections and a green open-widget indicator.
-- **Focused windows framed by white / blue / white lines.** Inactive windows
-  retain a single gray border.
-- A subtle fade and 17% dimming for unfocused windows. Ordinary inactive windows
-  target 97% compositor opacity rather than adding another opacity multiplier.
-  Application opt-outs, fullscreen windows, intrinsic transparency and later
-  user rules are preserved. Focused windows keep their normal appearance.
-  This uses transparency and dimming, not a desaturation filter.
-- Gentle 275 ms ease-out focus transitions for both opacity and dimming:
-  an immediate response followed by soft, analog-inspired settling, without bounce.
-  Other window and workspace animations retain Omarchy's defaults.
+### Base theme
+
+- Terminal and application palettes: DOS blue, white text, yellow emphasis and
+  cyan directory names. Normal ANSI green appears yellow; widget buttons keep
+  their own green fills.
+- Gray bar, popup and menu colors, plus supported shell control colors/states.
+- Ordinary white focused-window borders and gray inactive-window borders.
 - Seventeen static 4K wallpapers: IDE workspaces, Pascal source, a DOS prompt,
   text-mode scenery, mathematical geometry, and a DOS-colored Omarchy logo.
   No animations or additional wallpaper renderer.
 
-The frame styling, inactive-window fade, and widget enhancements require the
-companion installer. The palette works on its own.
+Omarchy generates the application configs from `colors.toml` and
+`shell.*.toml`. Custom widgets receive the colors they support, not an automatic
+redesign.
+
+### Optional extras
+
+- **White / blue / white focused-window frames.** Inactive windows retain a
+  single gray border.
+- Double-white widget frames, black text on gray panels and crisp black shadows.
+- Raised green buttons with white labels; selected buttons are darker and
+  recessed.
+- Styled menus with a green open-widget indicator.
+- 17% inactive dimming and a 97% compositor-opacity target for ordinary inactive
+  windows, without another opacity multiplier. Application opt-outs, fullscreen
+  windows, intrinsic transparency and later user rules are preserved.
+- Gentle 275 ms ease-out fades for opacity and dimming, without bounce or
+  desaturation. Other window and workspace animations keep Omarchy's defaults.
+
+These require the separate extras installer, which replaces supported stock
+components with styled clones. The base palette works on its own.
 
 ![Illustrative Pascal terminal showing the theme's DOS-blue, yellow, and cyan palette alongside a gray widget panel](docs/preview.png)
 
