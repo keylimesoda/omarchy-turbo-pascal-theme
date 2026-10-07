@@ -1,0 +1,23 @@
+$$$$$$$^^~~~~~~~~~~~~~~~~~~~~^^$$$$$$$$+------------------------------------+
+$$$$$$^     ~^  $  $$ $ $ $ I  ~^$$$$$$|-TheDobbsheadRadioActivSystemOnline-|
+$$$$$            ~ ~~ ~I          $$$$$| -SubGenii: Bob Slack, Crazy Horse- |
+$$$$'                  '  _,w$<    $$$$|      -Pinks&Glorps: General-       |
+$$$$     $$$$$$$$w___,w$$$$$$$$  $  $$$|------------------------------------|
+$$$$     $$$$$$$$$$$$$$$$$$$$$$  I  $$$|-Dobbshead-(317) 736-6439-Discordia-|
+$$$$     $$$$$$$$$$$$$$$$$$$$*$[ i  $$$|-Weekdays 9pm-4pm, Weekends 9pm-9am-|
+$$$$     $$$$$$$$$$$$$$$$$$$$[][ | ]$$$|------------------------------------|
+$$$$     ~_,,_ ~$$$$$$$~ ____~ $    $$$| -Dedicated to things free! Speech- |
+$$$$    _~ ,  ,  `$$$~  _  _`$ ]L  J$$$| -Thought, Religion, Slack, fnord?- |
+$$$$  , $$w$ww+   $$$ww``,,$w$ ][  $$$$|------------------------------------|
+$$$$,  $$$$www$$$ $$$$$$$ww$$$$$[  $$$$| -Also Known As: The Metaphysical-  |
+$$$$$_|| $$$$$$P' $$P$$$$$$$$$$$[|c$$$$|   -Workshop and AlternativLand-    |
+$$$$$$w| '$$P~  P]$$$-~, ~Y$$^'],$$$$$$|------------------------------------|
+$$$$$$$[   _        _J$$Tk     ]]$$$$$$|-uXu Distribution Site-Online Games-|
+$$$$$$$$,$ $$, c,,,,,,,y ,w$$[ ,$$$$$$$|-Online Text Library-Text File Libs-|
+$$$$$$$$$ i $w   ====--_$$$$$  $$$$$$$$|-Messages Bases From Metaphysics to-|
+$$$$$$$$$$`,P~ _ ~^^^^Y$$$$$  $$$$$$$$$|-Underground Conversations-CU/H/P/A-|
+$$$$^^=^$$^   ^' ,ww,w$$$$$ _$$$$$$$$$$|-Encryption Areas-2500+ Text Files--|
+$$$_xJ~ ~   ,    $$$$$$$P~_$$$$$$$$$$$$|-Informaton on The Net-No Ratios----|
+$$   $,   ,$$$,_____   _,J$$$$$$$$$$$$$|-Free Access-Full Access First Call-|
+$$L  `' ,$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$|-MUD OnLine-Illuminations on Request|
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$+------------------------------------+

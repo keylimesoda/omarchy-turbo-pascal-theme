@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+  <title>Empty IDE</title>
+  <rect width="960" height="540" fill="#0000AA"/>
+<g fill="none" stroke="#FFFFFF" stroke-width="0.75" shape-rendering="crispEdges"><rect x="64.5" y="64.5" width="831" height="411"/><rect x="67.5" y="67.5" width="825" height="405"/></g>
+<rect x="395" y="58" width="170" height="16" fill="#0000AA"/>
+<text x="480" y="67" fill="#FFFFFF" font-family="JetBrainsMono Nerd Font, monospace" font-size="10" text-anchor="middle" xml:space="preserve">UNTITLED.PAS</text>
+<rect x="748" y="465" width="130" height="17" fill="#0000AA"/>
+<text x="867" y="475" fill="#AAAAAA" font-family="JetBrainsMono Nerd Font, monospace" font-size="8" text-anchor="end" xml:space="preserve">Ln 1  Col 1  INS</text>
+<text x="88" y="106" fill="#AAAAAA" font-family="JetBrainsMono Nerd Font, monospace" font-size="9" text-anchor="start" xml:space="preserve">1</text>
+<rect x="107" y="105" width="6" height="1.5" fill="#FFFFFF"/>
+</svg>

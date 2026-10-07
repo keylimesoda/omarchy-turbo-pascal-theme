@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+  <title>DOS prompt</title>
+  <rect width="960" height="540" fill="#0000AA"/>
+<text x="264" y="205" fill="#FFFFFF" font-family="JetBrainsMono Nerd Font, monospace" font-size="11" text-anchor="start" xml:space="preserve">Omarchy Desktop [Turbo Pascal Edition]</text>
+<text x="264" y="229" fill="#AAAAAA" font-family="JetBrainsMono Nerd Font, monospace" font-size="10" text-anchor="start" xml:space="preserve">A quiet place to think.</text>
+<text x="264" y="275" fill="#55FFFF" font-family="JetBrainsMono Nerd Font, monospace" font-size="12" text-anchor="start" xml:space="preserve">C:\&gt;CD OMARCHY</text>
+<text x="264" y="304" fill="#FFFFFF" font-family="JetBrainsMono Nerd Font, monospace" font-size="12" text-anchor="start" xml:space="preserve">C:\OMARCHY&gt;</text>
+<rect x="344" y="295" width="7" height="12" fill="#FFFF55"/>
+</svg>

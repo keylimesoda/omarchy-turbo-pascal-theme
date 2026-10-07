@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+  <title>Pascal-demo wireframe cube</title>
+  <rect width="960" height="540" fill="#0000AA"/>
+<polyline points="477.15,297.78 413.00,166.75" fill="none" stroke="#00AAAA" stroke-width="0.9" stroke-linejoin="round"/>
+<polyline points="477.15,297.78 617.02,274.72" fill="none" stroke="#00AAAA" stroke-width="0.9" stroke-linejoin="round"/>
+<polyline points="477.15,297.78 404.56,400.57" fill="none" stroke="#00AAAA" stroke-width="0.9" stroke-linejoin="round"/>
+<polyline points="413.00,166.75 558.34,114.04" fill="none" stroke="#00AAAA" stroke-width="0.9" stroke-linejoin="round"/>
+<polyline points="617.02,274.72 558.34,114.04" fill="none" stroke="#00AAAA" stroke-width="0.9" stroke-linejoin="round"/>
+<polyline points="413.00,166.75 308.81,241.61" fill="none" stroke="#00AAAA" stroke-width="0.9" stroke-linejoin="round"/>
+<polyline points="617.02,274.72 576.49,394.30" fill="none" stroke="#55FF55" stroke-width="0.9" stroke-linejoin="round"/>
+<polyline points="404.56,400.57 308.81,241.61" fill="none" stroke="#55FF55" stroke-width="0.9" stroke-linejoin="round"/>
+<polyline points="404.56,400.57 576.49,394.30" fill="none" stroke="#55FF55" stroke-width="0.9" stroke-linejoin="round"/>
+<polyline points="558.34,114.04 485.42,188.25" fill="none" stroke="#55FF55" stroke-width="0.9" stroke-linejoin="round"/>
+<polyline points="308.81,241.61 485.42,188.25" fill="none" stroke="#55FF55" stroke-width="0.9" stroke-linejoin="round"/>
+<polyline points="576.49,394.30 485.42,188.25" fill="none" stroke="#55FF55" stroke-width="0.9" stroke-linejoin="round"/>
+<rect x="483.92" y="186.75" width="3" height="3" fill="#FFFF55"/>
+<text x="480" y="449" fill="#AAAAAA" font-family="JetBrainsMono Nerd Font, monospace" font-size="8" text-anchor="middle" xml:space="preserve">WIREFRAME CUBE  /  BGI STUDY 04</text>
+</svg>

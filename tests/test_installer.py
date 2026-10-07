@@ -133,6 +133,17 @@ class InstallerTests(unittest.TestCase):
             item.stop()
         self.directory.cleanup()
 
+    def test_install_preserves_wallpaper_license_notices(self):
+        self.instance.install()
+        self.assertEqual(
+            (self.instance.theme / "licenses/scarecrow-bbs-NOTICE.txt").read_bytes(),
+            (ROOT / "licenses/scarecrow-bbs-NOTICE.txt").read_bytes(),
+        )
+        self.assertEqual(
+            (self.instance.theme / "LICENSE").read_bytes(),
+            (ROOT / "LICENSE").read_bytes(),
+        )
+
     def test_install_preserves_layout_options_and_unrelated_settings(self):
         self.instance.install()
         config = installer.read_json(self.instance.shell)

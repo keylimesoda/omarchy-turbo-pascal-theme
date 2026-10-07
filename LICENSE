@@ -19,3 +19,11 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+Third-party exceptions:
+
+The archive-derived artwork/14-bbs-planet.txt, artwork/15-bbs-bat.txt, and
+artwork/16-bbs-pipe-portrait.txt, including their SVG and PNG renderings,
+are not covered by this MIT license.
+See licenses/scarecrow-bbs-NOTICE.txt for their source and distribution notice.
+Other third-party notices are retained in licenses/ and the adapted source files.

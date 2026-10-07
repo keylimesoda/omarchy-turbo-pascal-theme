@@ -20,17 +20,18 @@ hyprland_active_border = "rgba(ffffffff)"
 hyprland_inactive_border = "rgba(aaaaaaff)"
 
 # Bright ANSI colors keep command output readable on the DOS-blue surface.
+# ANSI green uses yellow emphasis; bright yellow uses orange.
 red = "#FF5555"
 yellow = "#FFFF55"
 orange = "#FFAA55"
-green = "#55FF55"
+green = "#FFFF55"
 cyan = "#55FFFF"
-blue = "#55FFFF"
+blue = "#00AAAA"
 magenta = "#FF55FF"
 brown = "#AA5500"
 
 bright_red = "#FF5555"
-bright_yellow = "#FFFF55"
+bright_yellow = "#FFAA55"
 bright_green = "#55FF55"
 bright_cyan = "#55FFFF"
 bright_blue = "#55FFFF"

@@ -25,7 +25,7 @@ MODULES = (
 THEME_FILES = (
     "colors.toml", "icons.theme", "hyprland.lua", "shell.bar.toml",
     "shell.controls.toml", "shell.launcher.toml", "shell.menu.toml",
-    "shell.popups.toml", "artwork", "backgrounds",
+    "shell.popups.toml", "artwork", "backgrounds", "LICENSE", "licenses",
 )
 
 

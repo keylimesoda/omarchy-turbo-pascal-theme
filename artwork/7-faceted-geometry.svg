@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+  <title>Faceted icosahedron</title>
+  <rect width="960" height="540" fill="#0000AA"/>
+<polygon points="526.41,336.28 431.84,284.26 523.61,228.40" fill="#000088" stroke="#55FFFF" stroke-width="0.7" stroke-linejoin="round"/>
+<polygon points="431.84,284.26 429.68,177.39 523.61,228.40" fill="#000088" stroke="#55FFFF" stroke-width="0.7" stroke-linejoin="round"/>
+<polygon points="526.41,336.28 523.61,228.40 602.79,260.75" fill="#000088" stroke="#55FFFF" stroke-width="0.7" stroke-linejoin="round"/>
+<polygon points="424.28,369.45 526.41,336.28 431.84,284.26" fill="#000088" stroke="#55FFFF" stroke-width="0.7" stroke-linejoin="round"/>
+<polygon points="536.43,149.15 429.68,177.39 523.61,228.40" fill="#000088" stroke="#55FFFF" stroke-width="0.7" stroke-linejoin="round"/>
+<polygon points="431.84,284.26 429.68,177.39 355.59,259.24" fill="#000088" stroke="#55FFFF" stroke-width="0.7" stroke-linejoin="round"/>
+<polygon points="536.43,149.15 523.61,228.40 602.79,260.75" fill="#000088" stroke="#55FFFF" stroke-width="0.7" stroke-linejoin="round"/>
+<polygon points="424.28,369.45 431.84,284.26 355.59,259.24" fill="#000088" stroke="#55FFFF" stroke-width="0.7" stroke-linejoin="round"/>
+<polygon points="526.41,336.28 543.96,365.00 602.79,260.75" fill="#000088" stroke="#55FFFF" stroke-width="0.7" stroke-linejoin="round"/>
+<polygon points="424.28,369.45 526.41,336.28 543.96,365.00" fill="#000088" stroke="#55FFFF" stroke-width="0.7" stroke-linejoin="round"/>
+<polygon points="418.44,158.83 536.43,149.15 429.68,177.39" fill="#00AAAA" stroke="#55FFFF" stroke-width="0.7" stroke-linejoin="round"/>
+<polygon points="418.44,158.83 429.68,177.39 355.59,259.24" fill="#00AAAA" stroke="#55FFFF" stroke-width="0.7" stroke-linejoin="round"/>
+<polygon points="536.43,149.15 553.76,222.83 602.79,260.75" fill="#00AAAA" stroke="#55FFFF" stroke-width="0.7" stroke-linejoin="round"/>
+<polygon points="424.28,369.45 355.59,259.24 413.19,308.42" fill="#00AAAA" stroke="#55FFFF" stroke-width="0.7" stroke-linejoin="round"/>
+<polygon points="543.96,365.00 553.76,222.83 602.79,260.75" fill="#000088" stroke="#55FFFF" stroke-width="0.7" stroke-linejoin="round"/>
+<polygon points="424.28,369.45 543.96,365.00 413.19,308.42" fill="#000088" stroke="#55FFFF" stroke-width="0.7" stroke-linejoin="round"/>
+<polygon points="418.44,158.83 536.43,149.15 553.76,222.83" fill="#AAAAAA" stroke="#55FFFF" stroke-width="0.7" stroke-linejoin="round"/>
+<polygon points="418.44,158.83 355.59,259.24 413.19,308.42" fill="#AAAAAA" stroke="#55FFFF" stroke-width="0.7" stroke-linejoin="round"/>
+<polygon points="543.96,365.00 553.76,222.83 413.19,308.42" fill="#00AAAA" stroke="#55FFFF" stroke-width="0.7" stroke-linejoin="round"/>
+<polygon points="418.44,158.83 553.76,222.83 413.19,308.42" fill="#FFFFFF" stroke="#55FFFF" stroke-width="0.7" stroke-linejoin="round"/>
+<polyline points="418.44,158.83 553.76,222.83" fill="none" stroke="#FFFF55" stroke-width="1.1"/>
+<text x="480" y="429" fill="#AAAAAA" font-family="JetBrainsMono Nerd Font, monospace" font-size="8" text-anchor="middle" xml:space="preserve">ICOSAHEDRON  /  BGI STUDY 02</text>
+</svg>

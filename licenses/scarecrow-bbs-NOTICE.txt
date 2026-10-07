@@ -1,0 +1,38 @@
+Source: Best of the Scarecrow's BBS Gallery 1.3
+Version 1.3, released May 16, 1994
+https://www.asciiart.eu/collections/best-of-the-scarecrows-bbs-gallery-1-3
+
+This notice applies to:
+  artwork/14-bbs-planet.txt and its generated SVG/PNG wallpaper
+  artwork/15-bbs-bat.txt and its generated SVG/PNG wallpaper
+  artwork/16-bbs-pipe-portrait.txt and its generated SVG/PNG wallpaper
+
+These archive-derived assets are NOT covered by this repository's MIT license.
+They are distributed at no charge under the archive's non-commercial notice
+below. This does not establish or guarantee permission for commercial reuse.
+Any individual artists' rights remain with their respective owners.
+
+Planet: Jay Thaler; original signature "-JT" retained. The archive includes
+Thaler's statement that he created this planet illustration.
+NightBreed bat: supplied to the archive by Herman Stevens. The archive does
+not establish whether Stevens was its original artist, so this is a contributor
+credit, not a claim of authorship. The original title and artwork are retained.
+Pipe portrait: the exact ASCII rendition supplied by the user, also appearing
+in the archive under contributor Brandon Thomas Mullins. The archive does not
+establish that contributor as the original artist. The portrait depicts the
+Dobbshead; the SubGenius Foundation asserts rights to the underlying image:
+https://www.subgenius.com/trademark.htm
+The archive notice is not a determination that those rights are extinguished.
+
+Changes: typeset as static 4K wallpapers on DOS blue, with a yellow title on
+the bat wallpaper and an added credit line. The original text is unchanged.
+
+Original archive notice:
+
+The Best of the Scarecrow's BBS Gallery
+This format and compilation as a whole is copyrighted by Glen Robbins.
+c1994 Glen Robbins
+
+This archive may be read and distributed non-commercially at no charge.
+The art is generally considered public domain, so use it as you want.
+I will immediately remove any art that a copyright holder asks be removed.
