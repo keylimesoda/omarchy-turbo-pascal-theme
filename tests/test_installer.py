@@ -40,6 +40,13 @@ class DesktopFixture:
         self.fail_enable = False
         self.fail_build = False
 
+    def config(self):
+        if self.instance.shell.is_file():
+            config = installer.read_json(self.instance.shell)
+            if isinstance(config, dict) and config.get("version") == 1:
+                return config
+        return copy.deepcopy(DEFAULT)
+
     def run(self, *args, capture=False):
         self.calls.append(args)
         if args == ("omarchy", "version"):
@@ -54,13 +61,26 @@ class DesktopFixture:
             return ""
         if args == ("omarchy-shell", "shell", "ping"):
             return "ok"
+        if args == ("omarchy-shell", "shell", "listShellConfig"):
+            return json.dumps(self.config())
+        if args == ("omarchy-shell", "shell", "listPlugins"):
+            catalog = [{"id": f"omarchy.{module}"} for module in installer.MODULES]
+            for path in (self.instance.config / "plugins").glob("*/manifest.json"):
+                item = installer.read_json(path)
+                catalog.append({"id": item["id"],
+                                "clonedFrom": item.get("omarchy", {}).get("clonedFrom"),
+                                "enabled": item["id"] in installer.active_ids(self.config())})
+            return json.dumps(catalog)
+        if args[0] == "bash" and "apply-borders" in args[1] and args[-1] not in ("--build", "--unload"):
+            installer.write_json(self.instance.data / "runtime-status.json",
+                                 {"active": ["focus effects"], "skipped": []})
         if args[:3] == ("omarchy", "plugin", "enable"):
             if self.fail_enable:
                 raise subprocess.CalledProcessError(1, args)
-            config = self.instance.effective_config()
+            config = self.config()
             name = args[3]
             source = "omarchy." + name.split(".", 1)[1]
-            if name == "turbo-pascal.bar":
+            if name.endswith(".bar"):
                 config["bar"]["id"] = name
             for entries in config["bar"]["layout"].values():
                 for entry in entries:
@@ -71,8 +91,10 @@ class DesktopFixture:
                 config.setdefault("cloneSourceRestores", []).append(name)
             installer.write_json(self.instance.shell, config)
         elif args[:3] == ("omarchy", "plugin", "disable"):
-            config = self.instance.effective_config()
+            config = self.config()
             name = args[3]
+            if name.endswith(".bar"):
+                raise subprocess.CalledProcessError(1, args)
             source = "omarchy." + name.split(".", 1)[1]
             if config["bar"].get("id") == name:
                 del config["bar"]["id"]
@@ -80,6 +102,8 @@ class DesktopFixture:
                 for entry in entries:
                     if entry["id"] == name:
                         entry["id"] = source
+            config["plugins"] = [entry for entry in config.get("plugins", [])
+                                 if entry["id"] != name]
             for key, value in (("disabledPlugins", source), ("cloneSourceRestores", name)):
                 if value in config.get(key, []):
                     config[key].remove(value)
@@ -118,6 +142,10 @@ class InstallerTests(unittest.TestCase):
         hypr.mkdir(parents=True)
         (hypr / "hyprland.lua").write_text("-- fixture")
         installer.write_json(self.instance.shell, copy.deepcopy(DEFAULT))
+        self.instance.theme.mkdir(parents=True)
+        shutil.copy2(ROOT / "colors.toml", self.instance.theme)
+        shutil.copy2(ROOT / "LICENSE", self.instance.theme)
+        shutil.copytree(ROOT / "licenses", self.instance.theme / "licenses")
         self.desktop = DesktopFixture(self.instance)
         self.patches = [
             patch.object(installer, "run", self.desktop.run),
@@ -135,6 +163,9 @@ class InstallerTests(unittest.TestCase):
 
     def test_install_preserves_wallpaper_license_notices(self):
         self.instance.install()
+        for name in ("runtime.py", "focus.conf", "client-hash.cpp", "apply-borders"):
+            self.assertEqual((self.instance.data / name).read_bytes(),
+                             (ROOT / "extras/borders" / name).read_bytes())
         self.assertEqual(
             (self.instance.theme / "licenses/scarecrow-bbs-NOTICE.txt").read_bytes(),
             (ROOT / "licenses/scarecrow-bbs-NOTICE.txt").read_bytes(),
@@ -150,7 +181,7 @@ class InstallerTests(unittest.TestCase):
         self.assertEqual(config["idle"], DEFAULT["idle"])
         self.assertEqual(config["plugins"], DEFAULT["plugins"])
         self.assertEqual(config["bar"]["position"], "bottom")
-        self.assertEqual(config["bar"]["centerAnchor"], "omarchy.clock")
+        self.assertEqual(config["bar"]["centerAnchor"], "turbo-pascal.clock")
         self.assertEqual(config["bar"]["layout"]["center"],
                          [{"id": "turbo-pascal.clock", "format": "HH:mm"}])
         self.assertEqual(config["bar"]["layout"]["right"][1],
@@ -161,14 +192,14 @@ class InstallerTests(unittest.TestCase):
             self.assertTrue((self.instance.config / "hooks" /
                             f"{event}.d/turbo-pascal-borders").is_file())
 
-    def test_uninstall_restores_exact_original_files(self):
+    def test_uninstall_restores_shell_and_retains_base_theme(self):
         original = self.instance.shell.read_bytes()
         self.instance.install()
         self.instance.uninstall()
         self.assertEqual(self.instance.shell.read_bytes(), original)
-        self.assertFalse(self.instance.theme.exists())
+        self.assertTrue(self.instance.theme.exists())
         self.assertFalse(self.instance.data.exists())
-        self.assertEqual((self.instance.current / "theme.name").read_text(), "tokyo-night")
+        self.assertEqual((self.instance.current / "theme.name").read_text(), "turbo-pascal")
         self.assertTrue(self.instance.state_file.is_file())
         self.instance.uninstall()
 
@@ -193,11 +224,11 @@ class InstallerTests(unittest.TestCase):
         self.instance.uninstall()
         self.assertEqual((self.instance.current / "theme.name").read_text(), "catppuccin")
 
-    def test_existing_theme_is_backed_up_and_restored(self):
-        self.instance.theme.mkdir(parents=True)
+    def test_existing_theme_is_not_overwritten(self):
         (self.instance.theme / "colors.toml").write_text("original palette")
         (self.instance.theme / "personal.txt").write_text("keep")
         self.instance.install()
+        self.assertEqual((self.instance.theme / "colors.toml").read_text(), "original palette")
         self.instance.uninstall()
         self.assertEqual((self.instance.theme / "colors.toml").read_text(), "original palette")
         self.assertEqual((self.instance.theme / "personal.txt").read_text(), "keep")
@@ -220,61 +251,68 @@ class InstallerTests(unittest.TestCase):
 
     def test_unsupported_version_refused_before_changes(self):
         self.desktop.hyprland_version = "0.57.0"
-        with self.assertRaisesRegex(RuntimeError, "matching headers"):
+        with self.assertRaisesRegex(RuntimeError, "allow-untested"):
             self.instance.install()
         self.assertFalse(self.instance.state_dir.exists())
         self.desktop.hyprland_version = "0.56.2"
-        self.desktop.omarchy_version = "4.1.0"
-        with self.assertRaisesRegex(RuntimeError, "Supported Omarchy"):
+        self.desktop.omarchy_version = "5.0.0"
+        with self.assertRaisesRegex(RuntimeError, "allow-untested"):
             self.instance.install()
 
-    def test_existing_border_plugin_refused(self):
+    def test_existing_border_plugin_skips_borders_only(self):
         self.desktop.plugins = [{"name": "borders-plus-plus"}]
-        with self.assertRaisesRegex(RuntimeError, "already loaded"):
-            self.instance.install()
-        self.assertFalse(self.instance.state_dir.exists())
+        self.instance.install()
+        self.assertFalse(self.instance.borders)
+        self.assertTrue(self.instance.focus)
+        self.assertTrue(self.instance.state["enabled"])
 
-    def test_custom_bar_refused(self):
+    def test_custom_bar_kept_without_permission(self):
         config = copy.deepcopy(DEFAULT)
         config["bar"]["id"] = "custom.bar"
         installer.write_json(self.instance.shell, config)
-        with self.assertRaisesRegex(RuntimeError, "custom bar"):
-            self.instance.install()
+        self.instance.confirm = lambda message: False
+        self.instance.install()
+        self.assertEqual(self.desktop.config()["bar"]["id"], "custom.bar")
+        self.assertNotIn("turbo-pascal.bar", self.instance.state["enabled"])
+        self.assertIn("turbo-pascal.power", self.instance.state["enabled"])
 
-    def test_active_custom_widget_clone_refused(self):
+    def test_active_custom_widget_clone_kept_without_permission(self):
         config = copy.deepcopy(DEFAULT)
         config["bar"]["layout"]["right"][0]["id"] = "custom.power"
         installer.write_json(self.instance.shell, config)
         installer.write_json(self.instance.config / "plugins/custom.power/manifest.json", {
             "id": "custom.power", "omarchy": {"clonedFrom": "omarchy.power"},
         })
-        with self.assertRaisesRegex(RuntimeError, "custom clone"):
-            self.instance.install()
+        self.instance.confirm = lambda message: False
+        self.instance.install()
+        self.assertEqual(self.desktop.config()["bar"]["layout"]["right"][0]["id"], "custom.power")
+        self.assertNotIn("turbo-pascal.power", self.instance.state["enabled"])
 
     def test_symlinked_target_refused(self):
-        self.instance.theme.parent.mkdir(parents=True)
+        target = self.instance.config / "plugins/turbo-pascal.power"
+        target.parent.mkdir(parents=True)
         other = self.home / "do-not-overwrite"
         other.mkdir()
-        self.instance.theme.symlink_to(other, target_is_directory=True)
+        target.symlink_to(other, target_is_directory=True)
         with self.assertRaisesRegex(RuntimeError, "symlink"):
             self.instance.install()
-        self.assertTrue(self.instance.theme.is_symlink())
+        self.assertTrue(target.is_symlink())
 
-    def test_enable_failure_rolls_back(self):
+    def test_enable_failure_keeps_native_effects_and_restores_widget_settings(self):
         self.desktop.fail_enable = True
-        with self.assertRaises(subprocess.CalledProcessError):
-            self.instance.install()
+        self.instance.install()
         self.assertEqual(installer.read_json(self.instance.shell), DEFAULT)
-        self.assertFalse(self.instance.data.exists())
-        self.assertFalse(self.instance.theme.exists())
-        self.assertEqual(self.instance.state["status"], "rolled-back")
+        self.assertTrue(self.instance.data.exists())
+        self.assertTrue(self.instance.theme.exists())
+        self.assertEqual(self.instance.state["status"], "installed")
+        self.assertEqual(self.instance.state["enabled"], [])
 
-    def test_build_failure_rolls_back(self):
+    def test_build_failure_skips_borders_not_other_extras(self):
         self.desktop.fail_build = True
-        with self.assertRaises(subprocess.CalledProcessError):
-            self.instance.install()
-        self.assertFalse(self.instance.data.exists())
-        self.assertEqual(installer.read_json(self.instance.shell), DEFAULT)
+        self.instance.install()
+        self.assertTrue(self.instance.data.exists())
+        self.assertFalse(self.instance.borders)
+        self.assertTrue(self.instance.state["enabled"])
 
     def test_local_plugin_edits_block_uninstall_without_removing_anything(self):
         self.instance.install()
@@ -289,10 +327,61 @@ class InstallerTests(unittest.TestCase):
     def test_runtime_build_artifacts_do_not_block_uninstall(self):
         self.instance.install()
         (self.instance.data / "plugin-session").write_text("new-session")
+        for name in ("build-hash", "runtime-status.json", "client-hash"):
+            (self.instance.data / name).write_text("generated artifact")
         (self.instance.data / "hyprland-plugins/borders-plus-plus/borders-plus-plus.so").write_bytes(
             b"rebuilt binary")
         self.instance.uninstall()
         self.assertFalse(self.instance.data.exists())
+
+    def test_custom_widget_restores_after_layout_edits_and_interrupted_restore(self):
+        config = copy.deepcopy(DEFAULT)
+        config["bar"]["layout"]["right"][0]["id"] = "custom.power"
+        installer.write_json(self.instance.shell, config)
+        installer.write_json(self.instance.config / "plugins/custom.power/manifest.json",
+                             {"id": "custom.power", "omarchy": {"clonedFrom": "omarchy.power"}})
+        self.instance.confirm = lambda message: True
+        self.instance.install()
+        config = self.desktop.config()
+        config["idle"]["lock"] = 999
+        installer.write_json(self.instance.shell, config)
+        original = self.desktop.run
+
+        def fail_restore(*args, **kwargs):
+            if args == ("omarchy", "plugin", "enable", "custom.power"):
+                raise subprocess.CalledProcessError(1, args)
+            return original(*args, **kwargs)
+
+        with patch.object(installer, "run", fail_restore):
+            with self.assertRaises(subprocess.CalledProcessError):
+                self.instance.uninstall()
+        self.instance.uninstall()
+        result = self.desktop.config()
+        self.assertEqual(result["idle"]["lock"], 999)
+        self.assertEqual(result["bar"]["layout"]["right"][0]["id"], "custom.power")
+        self.assertEqual(result["bar"]["centerAnchor"], "omarchy.clock")
+        self.assertEqual(result["bar"]["id"], "omarchy.bar")
+
+    def test_rollback_unload_failure_restores_independent_files_then_retries(self):
+        original_shell = self.instance.shell.read_bytes()
+        original = self.desktop.run
+
+        def fail_hooks_and_unload(*args, **kwargs):
+            if args[:3] == ("omarchy", "hook", "install") or (
+                    args[0] == "bash" and args[-1] == "--unload"):
+                raise subprocess.CalledProcessError(1, args)
+            return original(*args, **kwargs)
+
+        with patch.object(installer, "run", fail_hooks_and_unload):
+            with self.assertRaisesRegex(RuntimeError, "retry ./uninstall.sh"):
+                self.instance.install()
+        self.assertEqual(self.instance.shell.read_bytes(), original_shell)
+        self.assertFalse((self.instance.config / "plugins/turbo-pascal.power").exists())
+        self.assertTrue(self.instance.data.exists())
+        self.assertEqual(self.instance.state["status"], "rolling-back")
+        self.instance.uninstall()
+        self.assertFalse(self.instance.data.exists())
+        self.assertEqual(self.instance.state["status"], "rolled-back")
 
     def test_reinstall_archives_previous_backups(self):
         self.instance.install()
@@ -316,6 +405,189 @@ class InstallerTests(unittest.TestCase):
                 if 'import "../turbo-pascal.bar/DosUi" as DosUi' in text:
                     self.assertTrue((path / "../turbo-pascal.bar/DosUi").is_dir())
         self.assertFalse(list(ROOT.rglob("*.so")))
+
+    def test_missing_base_theme_instructs_standard_install(self):
+        (self.instance.theme / "colors.toml").unlink()
+        with self.assertRaisesRegex(RuntimeError, "omarchy theme install"):
+            self.instance.install()
+        self.assertFalse(self.instance.state_dir.exists())
+
+    def test_extension_does_not_modify_or_remove_base_clone(self):
+        (self.instance.theme / ".git").mkdir()
+        (self.instance.theme / ".git/config").write_text("base clone sentinel")
+        before = installer.fingerprint(self.instance.theme)
+        self.instance.install()
+        self.assertEqual(installer.fingerprint(self.instance.theme), before)
+        self.instance.uninstall()
+        self.assertEqual(installer.fingerprint(self.instance.theme), before)
+
+    def test_already_active_base_is_not_reapplied_during_install(self):
+        (self.instance.current / "theme.name").write_text("turbo-pascal")
+        self.instance.install()
+        self.assertFalse(any(call[:3] == ("omarchy", "theme", "set")
+                             for call in self.desktop.calls))
+
+    def test_uninstall_can_retry_after_restart_failure(self):
+        self.instance.install()
+        original = self.desktop.run
+
+        def fail_restart(*args, **kwargs):
+            if args == ("omarchy", "restart", "shell"):
+                raise subprocess.CalledProcessError(1, args)
+            return original(*args, **kwargs)
+
+        with patch.object(installer, "run", fail_restart):
+            with self.assertRaises(subprocess.CalledProcessError):
+                self.instance.uninstall()
+        self.assertFalse(self.instance.data.exists())
+        self.assertTrue(self.instance.theme.exists())
+        self.assertEqual(self.instance.state["status"], "uninstalling")
+        theme_calls = sum(call[:3] == ("omarchy", "theme", "set")
+                          for call in self.desktop.calls)
+        config = installer.read_json(self.instance.shell)
+        config["idle"]["lock"] = 999
+        installer.write_json(self.instance.shell, config)
+        self.instance.uninstall()
+        self.assertEqual(installer.read_json(self.instance.shell)["idle"]["lock"], 999)
+        self.assertEqual(self.instance.state["status"], "uninstalled")
+        self.assertEqual(sum(call[:3] == ("omarchy", "theme", "set")
+                             for call in self.desktop.calls), theme_calls)
+
+    def test_uninstall_can_retry_after_theme_refresh_failure(self):
+        self.instance.install()
+        original = self.desktop.run
+
+        def fail_refresh(*args, **kwargs):
+            if args[:3] == ("omarchy", "theme", "set"):
+                raise subprocess.CalledProcessError(1, args)
+            return original(*args, **kwargs)
+
+        with patch.object(installer, "run", fail_refresh):
+            with self.assertRaises(subprocess.CalledProcessError):
+                self.instance.uninstall()
+        self.assertFalse(self.instance.data.exists())
+        self.instance.uninstall()
+        self.assertEqual(self.instance.state["status"], "uninstalled")
+        self.assertTrue(self.instance.theme.exists())
+
+    def test_unload_failure_keeps_files_and_allows_retry(self):
+        self.instance.install()
+        original = self.desktop.run
+
+        def fail_unload(*args, **kwargs):
+            if args[0] == "bash" and args[-1] == "--unload":
+                raise subprocess.CalledProcessError(1, args)
+            return original(*args, **kwargs)
+
+        with patch.object(installer, "run", fail_unload):
+            with self.assertRaises(subprocess.CalledProcessError):
+                self.instance.uninstall()
+        self.assertTrue(self.instance.data.exists())
+        self.assertTrue((self.instance.config / "plugins/turbo-pascal.power").exists())
+        self.instance.uninstall()
+        self.assertEqual(self.instance.state["status"], "uninstalled")
+
+    def test_legacy_uninstall_keeps_previous_theme_behavior(self):
+        self.instance.install()
+        self.instance.state["version"] = 1
+        self.instance.save()
+        self.instance.uninstall()
+        self.assertEqual((self.instance.current / "theme.name").read_text(), "tokyo-night")
+
+    def test_allow_untested_is_explicit_and_selects_matching_source(self):
+        self.desktop.hyprland_version = "0.57.0"
+        self.instance.allow_untested = True
+        self.instance.install()
+        self.assertEqual(self.instance.state["border_source"]["tag"], "v0.57.0")
+
+    def test_missing_compiler_does_not_block_focus_or_widgets(self):
+        with patch.object(installer.shutil, "which",
+                          side_effect=lambda name: None if name == "g++" else "/bin/fixture"):
+            self.instance.install()
+        self.assertFalse(self.instance.borders)
+        self.assertTrue(self.instance.focus)
+        self.assertTrue(self.instance.state["enabled"])
+
+    def test_native_only_install_and_uninstall_needs_no_shell(self):
+        self.instance.skip_widgets = True
+        self.instance.skip_borders = True
+        self.instance.install()
+        self.instance.uninstall()
+        self.assertFalse(self.instance.data.exists())
+        self.assertFalse(any(call[:3] == ("omarchy", "restart", "shell")
+                             for call in self.desktop.calls))
+
+    def test_custom_widget_replacement_is_prompted_and_preserves_files(self):
+        config = copy.deepcopy(DEFAULT)
+        config["bar"]["layout"]["right"][0]["id"] = "custom.power"
+        installer.write_json(self.instance.shell, config)
+        path = self.instance.config / "plugins/custom.power/manifest.json"
+        installer.write_json(path, {"id": "custom.power",
+                                   "omarchy": {"clonedFrom": "omarchy.power"}})
+        original = self.instance.shell.read_bytes()
+        prompts = []
+        self.instance.confirm = lambda message: prompts.append(message) or True
+        self.instance.install()
+        self.assertTrue(any("custom.power" in message for message in prompts))
+        self.assertTrue(path.exists())
+        self.instance.uninstall()
+        self.assertEqual(self.instance.shell.read_bytes(), original)
+
+    def test_custom_bar_replacement_does_not_try_to_disable_a_bar(self):
+        config = copy.deepcopy(DEFAULT)
+        config["bar"]["id"] = "custom.bar"
+        installer.write_json(self.instance.shell, config)
+        self.instance.confirm = lambda message: True
+        self.instance.install()
+        self.assertNotIn(("omarchy", "plugin", "disable", "custom.bar"), self.desktop.calls)
+        self.instance.uninstall()
+        self.assertEqual(self.desktop.config()["bar"]["id"], "custom.bar")
+
+    def test_hidden_menu_gets_styling_without_adding_an_icon(self):
+        config = copy.deepcopy(DEFAULT)
+        config["bar"]["layout"]["left"].pop(0)
+        installer.write_json(self.instance.shell, config)
+        self.instance.install()
+        result = self.desktop.config()
+        self.assertIn("turbo-pascal.menu", installer.active_ids(result))
+        self.assertNotIn("turbo-pascal.menu", installer.layout_ids(result))
+        result["idle"]["lock"] = 999
+        installer.write_json(self.instance.shell, result)
+        self.instance.uninstall()
+        result = self.desktop.config()
+        self.assertEqual(result["idle"]["lock"], 999)
+        self.assertEqual(result["plugins"], DEFAULT["plugins"])
+        self.assertNotIn("omarchy.menu", installer.layout_ids(result))
+
+    def test_no_op_theme_activation_is_not_reported_as_success(self):
+        original = self.desktop.run
+
+        def no_op_activation(*args, **kwargs):
+            if args[:3] == ("omarchy", "theme", "set"):
+                return ""
+            return original(*args, **kwargs)
+
+        with patch.object(installer, "run", no_op_activation):
+            with self.assertRaisesRegex(RuntimeError, "did not activate"):
+                self.instance.install()
+        self.assertFalse(self.instance.data.exists())
+        self.assertEqual(self.desktop.config(), DEFAULT)
+        self.assertTrue(self.instance.theme.exists())
+
+    def test_keyboard_interrupt_rolls_back_partial_runtime(self):
+        original = self.desktop.run
+
+        def interrupt(*args, **kwargs):
+            if args[:2] == ("git", "clone"):
+                raise KeyboardInterrupt()
+            return original(*args, **kwargs)
+
+        with patch.object(installer, "run", interrupt):
+            with self.assertRaises(KeyboardInterrupt):
+                self.instance.install()
+        self.assertFalse(self.instance.data.exists())
+        self.assertTrue(self.instance.theme.exists())
+        self.assertEqual(self.instance.state["status"], "rolled-back")
 
 
 if __name__ == "__main__":

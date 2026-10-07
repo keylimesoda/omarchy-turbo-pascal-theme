@@ -4,10 +4,47 @@ DOS-blue workspaces, gray dialogs, green buttons, and **double-white borders**.
 An Omarchy theme inspired by Turbo Pascal's DOS IDE, with an optional companion
 installer that brings the window and widget frames along for the ride.
 
-![Turbo Pascal Theme for Omarchy: DOS blue, yellow accents, gray panels, green buttons, and double-white borders](docs/preview.png)
+![Turbo Pascal Theme for Omarchy running on a real desktop with terminals, a browser, a gray status bar, and the battery panel](docs/in-use.png)
 
-The terminal preview uses illustrative Pascal text and the theme's actual ANSI
-palette.
+An actual desktop in everyday use: DOS-blue terminals, the gray status bar and
+battery panel, green power-profile buttons, double-white focused-window borders,
+and dimmed, slightly transparent inactive windows. The browser keeps its own
+application styling. Only a browser profile picture and a session-specific path
+have been masked for privacy.
+
+## Install
+
+**Theme:** colors, gray panels and seventeen wallpapers.
+
+```bash
+omarchy theme install https://github.com/keylimesoda/omarchy-turbo-pascal-theme.git
+```
+
+**Optional extras:** double borders, styled buttons and focus fades.
+
+```bash
+cd ~/.config/omarchy/themes/turbo-pascal
+./install.sh
+```
+
+**Remove extras:** run `./uninstall.sh` from the same folder. The theme stays.
+
+Run without sudo. Incompatible extras are skipped; replacing custom widgets
+requires your permission.
+
+### Theme or extras?
+
+| Base theme: standard Omarchy install | Optional extension: separate script |
+|---|---|
+| Terminal and application palettes | Double-line focused-window borders |
+| Gray bar, popup and menu colors | Double-white widget frames and black shadows |
+| Supported shell control colors/states | Raised/recessed green buttons with white labels |
+| Ordinary white/gray window border colors | 17% inactive dimming and 275 ms focus fades |
+| All seventeen static wallpapers | 97% target opacity for ordinary inactive windows |
+
+The base uses `colors.toml` and `shell.*.toml`; Omarchy generates the application
+configs. Custom widgets receive the colors they support, not an automatic
+redesign. The extension replaces supported stock components with styled clones.
 
 ## What's included
 
@@ -26,10 +63,11 @@ palette.
 - Gray menus with green selections and a green open-widget indicator.
 - **Focused windows framed by white / blue / white lines.** Inactive windows
   retain a single gray border.
-- A subtle fade and 17% dimming for unfocused windows. Compositor inactive
-  opacity is `0.97`, combined with Omarchy's existing application-specific
-  opacity. Focused windows keep their normal appearance. This uses transparency
-  and dimming, not a desaturation filter.
+- A subtle fade and 17% dimming for unfocused windows. Ordinary inactive windows
+  target 97% compositor opacity rather than adding another opacity multiplier.
+  Application opt-outs, fullscreen windows, intrinsic transparency and later
+  user rules are preserved. Focused windows keep their normal appearance.
+  This uses transparency and dimming, not a desaturation filter.
 - Gentle 275 ms ease-out focus transitions for both opacity and dimming:
   an immediate response followed by soft, analog-inspired settling, without bounce.
   Other window and workspace animations retain Omarchy's defaults.
@@ -40,93 +78,110 @@ palette.
 The frame styling, inactive-window fade, and widget enhancements require the
 companion installer. The palette works on its own.
 
+![Illustrative Pascal terminal showing the theme's DOS-blue, yellow, and cyan palette alongside a gray widget panel](docs/preview.png)
+
+This additional terminal preview uses illustrative Pascal text and the theme's
+actual ANSI palette.
+
 ![Dot-sphere wallpaper with a double-white widget frame, gray panel, and raised and recessed green buttons](docs/desktop.png)
 
-## Full experience
+## Optional extension
 
-**Supported baseline: Omarchy 4.0.4 (tested with package 4.0.4-1), its Lua
-Hyprland configuration, and Hyprland 0.56.2 with matching development headers.**
-Other versions are deliberately rejected until the code has been checked
-against them. This is a first release, not a universal Hyprland plugin bundle.
+<details>
+<summary>Extension details: requirements, files and removal</summary>
 
-Review the scripts, then run these commands as your desktop user inside your
-running Hyprland session:
+Install the theme first. The commands above add the optional extension.
 
-```bash
-git clone https://github.com/keylimesoda/omarchy-turbo-pascal-theme.git
-cd omarchy-turbo-pascal-theme
-./install.sh --check
-./install.sh
-```
+**Tested baseline: Omarchy 4.0.4-1 and Hyprland 0.56.2.**
+The installer also attempts compatible extras on Omarchy 4.x with Hyprland
+0.52–0.56, using native Lua or legacy `.conf` output. Earlier-version syntax has
+been checked against upstream source, not tested on those desktops. Double
+borders have narrower compatibility than native focus effects.
 
-The installer activates the theme and restarts the shell. Do **not** use sudo.
-It needs Python 3, Git, GNU make, g++, pkg-config, jq, and the development
-packages reported by its prerequisite check. It never installs system packages
-or changes `/usr/share/omarchy`.
+| Option | Meaning |
+|---|---|
+| `--check` | Read-only prerequisite check; does not build or ask to replace widgets |
+| `--allow-untested` | Try other versions; never bypass compositor/header ABI checks |
+| `--skip-widgets` | Keep your existing widgets |
+| `--skip-borders` | Omit the compiled window-border plugin |
+| `--skip-focus` | Keep existing opacity, dimming and focus animations |
+
+Pass options to `./install.sh`; they can be combined.
+
+The extension activates the theme if necessary and restarts the shell.
+It does not copy, overwrite or own the installed base theme. Do **not** use sudo.
+It needs Python 3. Only double borders need Git, GNU make, g++, pkg-config and
+matching development packages. A missing tool or failed border build does not
+block widgets or focus effects. It never installs system packages or changes
+`/usr/share/omarchy`.
 
 The double border uses a small patch to the official
 [`borders-plus-plus`](https://github.com/hyprwm/hyprland-plugins/tree/v0.56.0/borders-plus-plus)
-plugin, pinned to upstream commit
-`7644cecdb947060682891a0db2a0cdc5c0b9e704`. It is built locally against your
-installed headers; no precompiled plugin binary is distributed.
+plugin. The 0.56 source is pinned to upstream commit
+`7644cecdb947060682891a0db2a0cdc5c0b9e704`; other versions attempt a matching
+upstream tag. A patch/build failure skips double borders. The running
+compositor commit and available ABI hash must match the installed headers and
+dependencies; no precompiled plugin binary is distributed.
 
 ### What the installer changes
 
 | Location | Purpose |
 |---|---|
-| `~/.config/omarchy/themes/turbo-pascal/` | Theme palette and wallpaper |
 | `~/.config/omarchy/plugins/turbo-pascal.*/` | User-owned shell clones |
 | `~/.config/omarchy/shell.json` | Switch the built-in bar and existing supported widgets to those clones |
-| `~/.config/omarchy/hooks/{theme-set,post-boot}.d/turbo-pascal-borders` | Theme-aware border loading |
-| `~/.local/share/omarchy-turbo-pascal/` | Border source, locally built plugin, and runtime script |
+| `~/.config/omarchy/hooks/{theme-set,post-boot}.d/turbo-pascal-borders` | Theme-aware native effects and border loading |
+| `~/.local/share/omarchy-turbo-pascal/` | Focus settings, border source, locally built plugin and runtime status |
 | `~/.local/state/omarchy/turbo-pascal-install/` | Installation record and backups |
 
 Existing widget positions, options, unrelated plugins, and idle settings are
-preserved. Missing widgets are not added. Active custom bars or custom clones
-of affected widgets are rejected rather than overwritten. Existing
-`borders-plus-plus` installations, conflicting hooks, and symlinked installation
-targets are also rejected.
+preserved. Missing widget icons are not added; the menu service can still be
+styled without an icon. Custom components are kept unless you approve replacing
+them with stock-based styled clones. Their original files stay; their custom
+behavior does not transfer. Existing target files require permission and are
+backed up. Your transparent-bar setting is left alone.
+
+An existing `borders-plus-plus` installation skips our window borders, not the
+other extras. Conflicting hooks/runtime files and symlinked installation targets
+stop installation rather than being overwritten.
 
 Omarchy intentionally omits executable Lua from themes installed through Git.
-The explicitly authorized companion hook supplies this theme's border Lua to
-the generated theme at activation. Switching away unloads this installation's
-border plugin; the shell clones remain installed and fall back to the next
-theme's normal palette.
+The explicitly authorized companion hook appends only enabled native effects
+to the generated theme; it preserves Omarchy's base output. Focus effects do not
+need the compiled border plugin. Switching away removes the native overlay and
+unloads only this installation's border plugin; shell clones remain installed
+and fall back to the next theme's normal palette.
 
-### Uninstall and updates
+### Removal and updates
 
-```bash
-./uninstall.sh
-```
+Uninstall restores shell settings and removes the owned plugins, hooks and
+border runtime. The base theme stays installed; if it is active, Omarchy
+reapplies its standard appearance. Later bar-layout and widget-option edits are
+kept. Previously selected custom components are restored when still applicable.
 
-Uninstall restores backed-up theme files and shell settings, removes the owned
-plugins and hooks, and restores the previous theme if Turbo Pascal is still
-active. If you changed the bar layout after installation, the clones are
-swapped back without discarding your new layout or widget options.
-
-Edited theme/plugin/runtime files stop uninstall **before anything is removed**;
+Edited extension/plugin files stop removal before more files are removed;
 back up your edits and restore the installed files first. Backups are retained.
+If removal fails, fix the reported problem and run `./uninstall.sh` again.
 For an update, uninstall, pull the repository, then install again; the previous
 backup record is archived automatically.
 
-On unsupported Hyprland upgrades the border hook reports an error instead of
-loading an incompatible binary. Rebuilding is automatic only on the supported
-baseline. Shell clones are snapshots, so upstream shell changes do not
-automatically update them. Installer/hook lifecycle checks use isolated
-fixtures; a clean-machine installation and actual reboot persistence have not
-yet been verified.
+Older companion installations also managed base-theme files; their saved
+installation records retain the original restore behavior. Uninstall those
+before installing the base theme through the standard Omarchy command.
 
-## Palette only
+After compositor upgrades, borders rebuild only when headers/dependencies
+match; build/load failures are reported and skipped. See
+`~/.local/share/omarchy-turbo-pascal/runtime-status.json` for native-effect
+status. Shell clones are snapshots and do not automatically track upstream
+changes. Tests use isolated fixtures; a clean-machine installation and actual
+reboot persistence have not yet been verified.
 
-For the colors and wallpaper without installing executable companion code:
+The 97% target applies only to inactive, non-fullscreen windows carrying
+Omarchy's `default-opacity` tag. It preserves application opt-outs and does not
+eliminate transparency drawn inside an application. Excessive transparency on
+the other machine remains undiagnosed. Neither installation configures Copilot
+CLI, changes your font, or modifies your terminal command.
 
-```bash
-omarchy theme install https://github.com/keylimesoda/omarchy-turbo-pascal-theme.git
-```
-
-This does **not** install the double-line window/widget frames, inset button
-styling, or custom shadows. It also does not configure Copilot CLI, change your
-font, or modify your terminal command.
+</details>
 
 ## Development
 
