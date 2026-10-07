@@ -1,10 +1,13 @@
-# Turbo Pascal for Omarchy
+# Turbo Pascal Theme for Omarchy
 
 DOS-blue workspaces, gray dialogs, green buttons, and **double-white borders**.
 An Omarchy theme inspired by Turbo Pascal's DOS IDE, with an optional companion
 installer that brings the window and widget frames along for the ride.
 
-![Turbo Pascal theme with double-white borders](docs/preview.png)
+![Turbo Pascal Theme for Omarchy: DOS blue, yellow accents, gray panels, green buttons, and double-white borders](docs/preview.png)
+
+The terminal preview uses illustrative Pascal text and the theme's actual ANSI
+palette.
 
 ## What's included
 
@@ -29,6 +32,8 @@ installer that brings the window and widget frames along for the ride.
 
 The frame styling and widget enhancements require the companion installer.
 The palette works on its own.
+
+![Dot-sphere wallpaper with a double-white widget frame, gray panel, and raised and recessed green buttons](docs/desktop.png)
 
 ## Full experience
 
