@@ -76,7 +76,7 @@ installed headers; no precompiled plugin binary is distributed.
 |---|---|
 | `~/.config/omarchy/themes/turbo-pascal/` | Theme palette and wallpaper |
 | `~/.config/omarchy/plugins/turbo-pascal.*/` | User-owned shell clones |
-| `~/.config/omarchy/shell.json` | Switch the built-in bar and existing supported widgets to those clones |
+| `~/.config/omarchy/shell.json` | Switch existing supported widgets to those clones (the built-in bar stays active so third-party widgets keep their services) |
 | `~/.config/omarchy/hooks/{theme-set,post-boot}.d/turbo-pascal-borders` | Theme-aware border loading |
 | `~/.local/share/omarchy-turbo-pascal/` | Border source, locally built plugin, and runtime script |
 | `~/.local/state/omarchy/turbo-pascal-install/` | Installation record and backups |

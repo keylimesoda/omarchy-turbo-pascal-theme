@@ -157,6 +157,11 @@ class InstallerTests(unittest.TestCase):
                          {"id": "custom.example", "option": 42})
         self.assertNotIn("turbo-pascal.audio", installer.layout_ids(config))
         self.assertEqual(self.instance.state["status"], "installed")
+        # Replacement bars cannot pass plugin services to hosted widgets, so
+        # the built-in bar must stay active for third-party bar widgets.
+        self.assertEqual(config["bar"].get("id", "omarchy.bar"), "omarchy.bar")
+        self.assertNotIn("turbo-pascal.bar", self.instance.state["enabled"])
+        self.assertTrue((self.instance.config / "plugins/turbo-pascal.bar/DosUi").is_dir())
         for event in ("theme-set", "post-boot"):
             self.assertTrue((self.instance.config / "hooks" /
                             f"{event}.d/turbo-pascal-borders").is_file())

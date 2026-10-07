@@ -276,7 +276,11 @@ class Installer:
             enabled = []
             run("omarchy-shell", "shell", "rescanPlugins")
             for module in MODULES:
-                if module == "bar" or f"omarchy.{module}" in layout_ids(before):
+                # Keep Omarchy's built-in bar active. A replacement bar only
+                # receives service-less facades for the widgets it hosts, which
+                # breaks third-party widgets such as Sandman and OmaSettings.
+                # turbo-pascal.bar is still installed for its shared DosUi.
+                if module != "bar" and f"omarchy.{module}" in layout_ids(before):
                     run("omarchy", "plugin", "enable", f"turbo-pascal.{module}")
                     enabled.append(f"turbo-pascal.{module}")
             self.state["enabled"] = enabled
