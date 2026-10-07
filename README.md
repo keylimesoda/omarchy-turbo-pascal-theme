@@ -1,16 +1,14 @@
 # Turbo Pascal Theme for Omarchy
 
-DOS-blue workspaces, gray dialogs, green buttons, and **double-white borders**.
-An Omarchy theme inspired by Turbo Pascal's DOS IDE, with an optional companion
-installer that brings the window and widget frames along for the ride.
+An Omarchy theme inspired by Turbo Pascal's DOS IDE.
+
+DOS-blue workspaces, gray dialogs, green buttons, and **double-white borders**.  Base colors in the theme, with a companion installer that brings the window and widget frames along for the ride.
 
 ![Turbo Pascal Theme for Omarchy running on a real desktop with terminals, a browser, a gray status bar, and the battery panel](docs/in-use.png)
 
 An actual desktop in everyday use: DOS-blue terminals, the gray status bar and
 battery panel, green power-profile buttons, double-white focused-window borders,
-and dimmed, slightly transparent inactive windows. The browser keeps its own
-application styling. Only a browser profile picture and a session-specific path
-have been masked for privacy.
+and dimmed, slightly transparent inactive windows.
 
 ## Install
 
@@ -29,8 +27,7 @@ cd ~/.config/omarchy/themes/turbo-pascal
 
 **Remove extras:** run `./uninstall.sh` from the same folder. The theme stays.
 
-Run without sudo. Incompatible extras are skipped; replacing custom widgets
-requires your permission.
+Extras include hyprland config settings for window attention behavior, double-white borders, and custom base system widgets. Strives for easy compatibility, and will ask permission if install encounters potential incompatibilities.
 
 ### Theme or extras?
 
