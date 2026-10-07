@@ -72,15 +72,9 @@ redesign.
 - Gentle 275 ms ease-out fades for opacity and dimming, without bounce or
   desaturation. Other window and workspace animations keep Omarchy's defaults.
 
-These require the separate extras installer, which replaces supported stock
-components with styled clones. The base palette works on its own.
 
 ![Illustrative Pascal terminal showing the theme's DOS-blue, yellow, and cyan palette alongside a gray widget panel](docs/preview.png)
 
-This additional terminal preview uses illustrative Pascal text and the theme's
-actual ANSI palette.
-
-![Dot-sphere wallpaper with a double-white widget frame, gray panel, and raised and recessed green buttons](docs/desktop.png)
 
 ## Optional extension
 
