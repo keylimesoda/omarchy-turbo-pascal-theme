@@ -1,4 +1,9 @@
 hl.config({
+  decoration = {
+    inactive_opacity = 0.97,
+    dim_inactive = true,
+    dim_strength = 0.17,
+  },
   general = {
     border_size = 1,
     col = {
@@ -13,6 +18,10 @@ hl.config({
     },
   },
 })
+
+hl.curve("turboPascalSettle", { type = "bezier", points = { { 0.25, 0.75 }, { 0.5, 1 } } })
+hl.animation({ leaf = "fadeSwitch", enabled = true, speed = 2.75, bezier = "turboPascalSettle" })
+hl.animation({ leaf = "fadeDim", enabled = true, speed = 2.75, bezier = "turboPascalSettle" })
 
 for _, plugin in ipairs(hl.get_loaded_plugins()) do
   if plugin.name == "borders-plus-plus" then

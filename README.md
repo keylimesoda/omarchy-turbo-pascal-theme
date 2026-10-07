@@ -26,12 +26,19 @@ palette.
 - Gray menus with green selections and a green open-widget indicator.
 - **Focused windows framed by white / blue / white lines.** Inactive windows
   retain a single gray border.
+- A subtle fade and 17% dimming for unfocused windows. Compositor inactive
+  opacity is `0.97`, combined with Omarchy's existing application-specific
+  opacity. Focused windows keep their normal appearance. This uses transparency
+  and dimming, not a desaturation filter.
+- Gentle 275 ms ease-out focus transitions for both opacity and dimming:
+  an immediate response followed by soft, analog-inspired settling, without bounce.
+  Other window and workspace animations retain Omarchy's defaults.
 - Seventeen static 4K wallpapers: IDE workspaces, Pascal source, a DOS prompt,
   text-mode scenery, mathematical geometry, and a DOS-colored Omarchy logo.
   No animations or additional wallpaper renderer.
 
-The frame styling and widget enhancements require the companion installer.
-The palette works on its own.
+The frame styling, inactive-window fade, and widget enhancements require the
+companion installer. The palette works on its own.
 
 ![Dot-sphere wallpaper with a double-white widget frame, gray panel, and raised and recessed green buttons](docs/desktop.png)
 
