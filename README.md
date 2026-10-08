@@ -65,7 +65,7 @@ redesign.
 - Double-white widget frames, black text on gray panels and crisp black shadows.
 - Raised green buttons with white labels; selected buttons are darker and
   recessed.
-- Styled menus with a green open-widget indicator.
+- Styled menus with gray panels and green selections.
 - 17% inactive dimming and a 97% compositor-opacity target for ordinary inactive
   windows, without another opacity multiplier. Application opt-outs, fullscreen
   windows, intrinsic transparency and later user rules are preserved.
@@ -73,7 +73,7 @@ redesign.
   desaturation. Other window and workspace animations keep Omarchy's defaults.
 
 These require the separate extras installer, which replaces supported stock
-components with styled clones. The base palette works on its own.
+widgets with styled clones, not the bar itself. The base palette works on its own.
 
 ![Illustrative Pascal terminal showing the theme's DOS-blue, yellow, and cyan palette alongside a gray widget panel](docs/preview.png)
 
@@ -124,8 +124,8 @@ dependencies; no precompiled plugin binary is distributed.
 
 | Location | Purpose |
 |---|---|
-| `~/.config/omarchy/plugins/turbo-pascal.*/` | User-owned shell clones |
-| `~/.config/omarchy/shell.json` | Switch the built-in bar and existing supported widgets to those clones |
+| `~/.config/omarchy/plugins/turbo-pascal.*/` | User-owned widget clones and shared styling library |
+| `~/.config/omarchy/shell.json` | Switch existing supported widgets to those clones; keep the selected bar |
 | `~/.config/omarchy/hooks/{theme-set,post-boot}.d/turbo-pascal-borders` | Theme-aware native effects and border loading |
 | `~/.local/share/omarchy-turbo-pascal/` | Focus settings, border source, locally built plugin and runtime status |
 | `~/.local/state/omarchy/turbo-pascal-install/` | Installation record and backups |
@@ -136,6 +136,12 @@ styled without an icon. Custom components are kept unless you approve replacing
 them with stock-based styled clones. Their original files stay; their custom
 behavior does not transfer. Existing target files require permission and are
 backed up. Your transparent-bar setting is left alone.
+
+The stock bar is themed through `shell.bar.toml`, not replaced. This preserves
+third-party widgets' service access under the stock bar, including Sandman and
+OmaSettings. A bar you selected yourself is also left unchanged. The
+`turbo-pascal.bar/DosUi/` directory is only a shared widget styling library;
+the installer does not copy its bar engine or register a replacement bar.
 
 An existing `borders-plus-plus` installation skips our window borders, not the
 other extras. Conflicting hooks/runtime files and symlinked installation targets
@@ -160,6 +166,9 @@ back up your edits and restore the installed files first. Backups are retained.
 If removal fails, fix the reported problem and run `./uninstall.sh` again.
 For an update, uninstall, pull the repository, then install again; the previous
 backup record is archived automatically.
+
+If an older extras install selected `turbo-pascal.bar`, follow that update
+sequence to restore your previous bar and install the widget-only enhancements.
 
 Older companion installations also managed base-theme files; their saved
 installation records retain the original restore behavior. Uninstall those

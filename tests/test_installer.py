@@ -181,6 +181,7 @@ class InstallerTests(unittest.TestCase):
         self.assertEqual(config["idle"], DEFAULT["idle"])
         self.assertEqual(config["plugins"], DEFAULT["plugins"])
         self.assertEqual(config["bar"]["position"], "bottom")
+        self.assertNotIn("id", config["bar"])
         self.assertEqual(config["bar"]["centerAnchor"], "turbo-pascal.clock")
         self.assertEqual(config["bar"]["layout"]["center"],
                          [{"id": "turbo-pascal.clock", "format": "HH:mm"}])
@@ -266,15 +267,46 @@ class InstallerTests(unittest.TestCase):
         self.assertTrue(self.instance.focus)
         self.assertTrue(self.instance.state["enabled"])
 
-    def test_custom_bar_kept_without_permission(self):
+    def test_custom_bar_kept_without_a_replacement_prompt(self):
         config = copy.deepcopy(DEFAULT)
         config["bar"]["id"] = "custom.bar"
         installer.write_json(self.instance.shell, config)
-        self.instance.confirm = lambda message: False
+        self.instance.confirm = lambda message: self.fail("The installer must not ask to replace the bar")
         self.instance.install()
         self.assertEqual(self.desktop.config()["bar"]["id"], "custom.bar")
         self.assertNotIn("turbo-pascal.bar", self.instance.state["enabled"])
         self.assertIn("turbo-pascal.power", self.instance.state["enabled"])
+
+    def test_install_keeps_stock_bar_and_third_party_service_widgets(self):
+        for explicit_bar in (False, True):
+            with self.subTest(explicit_bar=explicit_bar):
+                config = copy.deepcopy(DEFAULT)
+                if explicit_bar:
+                    config["bar"]["id"] = "omarchy.bar"
+                third_party = [
+                    {"id": "lgse.sandman", "option": "keep"},
+                    {"id": "io.github.twiking.omasettings"},
+                ]
+                config["bar"]["layout"]["right"].extend(third_party)
+                config["plugins"].extend(copy.deepcopy(third_party))
+                installer.write_json(self.instance.shell, config)
+                self.instance.install()
+                result = self.desktop.config()
+                self.assertEqual(result["bar"].get("id"), config["bar"].get("id"))
+                self.assertEqual(result["bar"]["layout"]["right"][-2:], third_party)
+                self.assertEqual(result["plugins"], config["plugins"])
+                self.assertNotIn("turbo-pascal.bar", self.instance.state["enabled"])
+                self.assertFalse(any(call[:3] in (
+                    ("omarchy", "plugin", "enable"), ("omarchy", "plugin", "disable"))
+                    and call[3].endswith(".bar") for call in self.desktop.calls))
+                library = self.instance.config / "plugins/turbo-pascal.bar"
+                self.assertEqual([path.name for path in library.iterdir()], ["DosUi"])
+                self.assertEqual(installer.fingerprint(library / "DosUi"),
+                                 installer.fingerprint(ROOT / "extras/plugins/turbo-pascal.bar/DosUi"))
+                self.instance.uninstall()
+                self.assertEqual(self.desktop.config(), config)
+                self.assertFalse(library.exists())
+                self.desktop.calls.clear()
 
     def test_active_custom_widget_clone_kept_without_permission(self):
         config = copy.deepcopy(DEFAULT)
@@ -360,7 +392,7 @@ class InstallerTests(unittest.TestCase):
         self.assertEqual(result["idle"]["lock"], 999)
         self.assertEqual(result["bar"]["layout"]["right"][0]["id"], "custom.power")
         self.assertEqual(result["bar"]["centerAnchor"], "omarchy.clock")
-        self.assertEqual(result["bar"]["id"], "omarchy.bar")
+        self.assertNotIn("id", result["bar"])
 
     def test_rollback_unload_failure_restores_independent_files_then_retries(self):
         original_shell = self.instance.shell.read_bytes()
@@ -533,15 +565,40 @@ class InstallerTests(unittest.TestCase):
         self.instance.uninstall()
         self.assertEqual(self.instance.shell.read_bytes(), original)
 
-    def test_custom_bar_replacement_does_not_try_to_disable_a_bar(self):
+    def test_custom_bar_is_kept_even_when_widget_replacements_are_allowed(self):
         config = copy.deepcopy(DEFAULT)
         config["bar"]["id"] = "custom.bar"
         installer.write_json(self.instance.shell, config)
         self.instance.confirm = lambda message: True
         self.instance.install()
+        self.assertEqual(self.desktop.config()["bar"]["id"], "custom.bar")
+        self.assertNotIn("bar", self.instance.modules)
         self.assertNotIn(("omarchy", "plugin", "disable", "custom.bar"), self.desktop.calls)
         self.instance.uninstall()
         self.assertEqual(self.desktop.config()["bar"]["id"], "custom.bar")
+
+    def test_legacy_replacement_bar_is_restored_by_updated_uninstaller(self):
+        self.instance.install()
+        library = self.instance.config / "plugins/turbo-pascal.bar"
+        shutil.copy2(ROOT / "extras/plugins/turbo-pascal.bar/manifest.json", library)
+        shutil.copy2(ROOT / "extras/plugins/turbo-pascal.bar/Bar.qml", library)
+        record = next(record for record in self.instance.state["records"]
+                      if record["path"].endswith("plugins/turbo-pascal.bar"))
+        self.instance.finish_record(record)
+        self.instance.state["enabled"].append("turbo-pascal.bar")
+        self.instance.state["replacements"]["turbo-pascal.bar"] = []
+        config = self.desktop.config()
+        config["bar"]["id"] = "turbo-pascal.bar"
+        installer.write_json(self.instance.shell, config)
+        shell_record = next(record for record in self.instance.state["records"]
+                            if record["path"].endswith("shell.json"))
+        self.instance.finish_record(shell_record)
+        config["idle"]["lock"] = 999
+        installer.write_json(self.instance.shell, config)
+        self.instance.uninstall()
+        self.assertEqual(self.desktop.config()["bar"]["id"], "omarchy.bar")
+        self.assertEqual(self.desktop.config()["idle"]["lock"], 999)
+        self.assertFalse(library.exists())
 
     def test_hidden_menu_gets_styling_without_adding_an_icon(self):
         config = copy.deepcopy(DEFAULT)

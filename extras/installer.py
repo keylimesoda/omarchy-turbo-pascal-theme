@@ -19,7 +19,7 @@ UPSTREAM = "https://github.com/hyprwm/hyprland-plugins.git"
 UPSTREAM_TAG = "v0.56.0"
 UPSTREAM_COMMIT = "7644cecdb947060682891a0db2a0cdc5c0b9e704"
 MODULES = (
-    "bar", "menu", "monitor", "audio", "bluetooth", "network",
+    "menu", "monitor", "audio", "bluetooth", "network",
     "power", "clock", "agents", "weather", "tray",
 )
 
@@ -249,8 +249,6 @@ class Installer:
                 self.skip(source, "this stock component is unavailable")
                 continue
             custom = []
-            if module == "bar" and config.get("bar", {}).get("id", source) != source:
-                custom.append(config["bar"]["id"])
             for item in catalog:
                 if item.get("clonedFrom") == source:
                     if (item["id"] in active_ids(config) or item.get("enabled")) and item["id"] not in custom:
@@ -260,7 +258,7 @@ class Installer:
                     "Its files stay, but custom behavior will not carry over.")):
                 self.skip(source, "custom component kept")
                 continue
-            if module not in ("bar", "menu") and not (
+            if module != "menu" and not (
                     source in active_ids(config) or custom):
                 continue
             if module == "menu" and source in config.get("disabledPlugins", []) and not custom:
@@ -273,7 +271,7 @@ class Installer:
             self.modules[module] = custom
         library = self.config / "plugins/turbo-pascal.bar"
         self.safe_path(library)
-        if self.modules and "bar" not in self.modules and library.exists():
+        if self.modules and library.exists():
             if check or not self.confirm(f"Back up and replace the shared widget library at {library}?"):
                 self.modules = {}
                 self.skip("widgets", "shared widget library could not be installed")
@@ -337,7 +335,8 @@ class Installer:
                 finally:
                     write_json(self.data / "features.json", {"focus": self.focus, "borders": self.borders})
                     self.finish_record(data_record)
-            copied = (["bar"] + [module for module in self.modules if module != "bar"]) if self.modules else []
+            # Keep the existing import path, but install no replacement-bar manifest or engine.
+            copied = (["bar"] + list(self.modules)) if self.modules else []
             for module in copied:
                 name = f"turbo-pascal.{module}"
                 target = self.config / "plugins" / name
@@ -347,7 +346,11 @@ class Installer:
                     shutil.rmtree(target)
                 else:
                     target.unlink(missing_ok=True)
-                shutil.copytree(self.package / "extras/plugins" / name, target)
+                if module == "bar":
+                    shutil.copytree(self.package / "extras/plugins" / name / "DosUi",
+                                    target / "DosUi")
+                else:
+                    shutil.copytree(self.package / "extras/plugins" / name, target)
                 self.finish_record(record)
             if self.modules:
                 shell_record = self.snapshot(self.shell)
@@ -357,9 +360,8 @@ class Installer:
                     name = f"turbo-pascal.{module}"
                     original = self.shell.read_bytes() if self.shell.is_file() else None
                     try:
-                        if module != "bar":
-                            for old in custom:
-                                run("omarchy", "plugin", "disable", old)
+                        for old in custom:
+                            run("omarchy", "plugin", "disable", old)
                         run("omarchy", "plugin", "enable", name)
                     except subprocess.CalledProcessError as error:
                         if original is None:
