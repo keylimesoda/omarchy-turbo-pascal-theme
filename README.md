@@ -18,7 +18,7 @@ and dimmed, slightly transparent inactive windows.
 omarchy theme install https://github.com/keylimesoda/omarchy-turbo-pascal-theme.git
 ```
 
-**Optional extras:** double borders, styled widgets, GTK3 app colors and focus fades.
+**Optional extras:** double borders, styled widgets, GTK3 app theming and focus fades.
 
 ```bash
 cd ~/.config/omarchy/themes/turbo-pascal
@@ -68,19 +68,21 @@ redesign.
 - Raised green buttons with white labels; selected buttons are darker and
   recessed.
 - Styled menus with gray panels and green selections.
-- GTK3 styling: gray panels, blue editing areas, cyan/blue scrollbars and lists,
-  white dialog titles/field labels and outlines, black shadows, raised/recessed
-  green buttons, and sparse red error/destructive-action accents. Edge picks up
-  the browser UI colors with **Settings → Appearance → Overall appearance → GTK**.
-  Website contents and GTK4/libadwaita apps are unchanged.
+- **GTK3 app theming:** gray dialogs and toolbars, DOS-blue inputs and editors,
+  cyan lists and cyan/blue scrollbars, white titles and frames, green buttons,
+  black shadows, and sparse red error/destructive-action accents.
 - 17% inactive dimming and a 97% compositor-opacity target for ordinary inactive
   windows, without another opacity multiplier. Application opt-outs, fullscreen
   windows, intrinsic transparency and later user rules are preserved.
 - Gentle 275 ms ease-out fades for opacity and dimming, without bounce or
   desaturation. Other window and workspace animations keep Omarchy's defaults.
 
-![Illustrative Pascal terminal showing the theme's DOS-blue, yellow, and cyan palette alongside a gray widget panel](docs/preview.png)
+![Native GTK3 control demo with gray panels, a DOS-blue Pascal editor, a cyan file list, green buttons and a red Reset button](docs/gtk-apps.png)
 
+A native GTK3 control demo rendered with the installed theme, not a browser
+mockup. Edge also picks up the app colors with
+**Settings → Appearance → Overall appearance → GTK**. Website contents and
+GTK4/libadwaita apps are unchanged.
 
 ## Optional extension
 

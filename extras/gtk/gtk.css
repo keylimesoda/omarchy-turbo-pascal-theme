@@ -46,7 +46,8 @@ entry {
   caret-color: @dos_white;
 }
 
-textview text {
+textview text,
+textview.view text {
   background-color: @dos_blue;
   color: @dos_white;
 }

@@ -171,6 +171,10 @@ class GtkCssTests(unittest.TestCase):
         self.assertEqual(colors(["scrollbar", "trough"])[0], "rgb(0,170,170)")
         self.assertEqual(colors(["scrollbar", "trough", "slider"])[0], "rgb(0,0,170)")
         self.assertEqual(colors(["textview", "text"])[0], "rgb(0,0,170)")
+        self.assertEqual(colors([("textview", "view"), "text"]),
+                         ("rgb(0,0,170)", "rgb(255,255,255)"))
+        self.assertEqual(painted_background([("textview", "view"), "text"]),
+                         (0, 0, 170, 255))
         self.assertEqual(colors(["headerbar", ("label", "title")])[1],
                          "rgb(255,255,255)")
         self.assertEqual(colors(["dialog", "grid", "label"])[1],
