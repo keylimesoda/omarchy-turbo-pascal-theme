@@ -1,0 +1,223 @@
+@define-color theme_bg_color #aaaaaa;
+@define-color theme_fg_color #000000;
+@define-color theme_base_color #aaaaaa;
+@define-color theme_text_color #000000;
+@define-color theme_selected_bg_color #008800;
+@define-color theme_selected_fg_color #ffffff;
+@define-color theme_unfocused_bg_color #aaaaaa;
+@define-color theme_unfocused_fg_color #000000;
+@define-color theme_unfocused_base_color #aaaaaa;
+@define-color theme_unfocused_text_color #000000;
+@define-color theme_unfocused_selected_bg_color #008800;
+@define-color theme_unfocused_selected_fg_color #ffffff;
+
+:root {
+  --window-bg-color: #aaaaaa;
+  --window-fg-color: #000000;
+  --view-bg-color: #aaaaaa;
+  --view-fg-color: #000000;
+  --headerbar-bg-color: #aaaaaa;
+  --headerbar-fg-color: #000000;
+  --headerbar-backdrop-color: #aaaaaa;
+  --headerbar-border-color: #ffffff;
+  --headerbar-shade-color: transparent;
+  --headerbar-darker-shade-color: transparent;
+  --sidebar-bg-color: #aaaaaa;
+  --sidebar-fg-color: #000000;
+  --sidebar-backdrop-color: #aaaaaa;
+  --secondary-sidebar-bg-color: #aaaaaa;
+  --secondary-sidebar-fg-color: #000000;
+  --secondary-sidebar-backdrop-color: #aaaaaa;
+  --card-bg-color: #aaaaaa;
+  --card-fg-color: #000000;
+  --dialog-bg-color: #aaaaaa;
+  --dialog-fg-color: #000000;
+  --popover-bg-color: #aaaaaa;
+  --popover-fg-color: #000000;
+  --accent-bg-color: #008800;
+  --accent-fg-color: #ffffff;
+  --accent-color: #006600;
+  --destructive-bg-color: #aa0000;
+  --destructive-fg-color: #ffffff;
+  --destructive-color: #aa0000;
+  --error-bg-color: #aa0000;
+  --error-fg-color: #ffffff;
+  --error-color: #aa0000;
+  --border-color: #ffffff;
+}
+
+* {
+  border-radius: 0;
+  text-shadow: none;
+}
+
+window.background,
+headerbar,
+toolbar,
+.toolbar,
+popover > contents {
+  background-color: #aaaaaa;
+  background-image: none;
+  color: #000000;
+  border-radius: 0;
+}
+
+headerbar .title,
+headerbar .subtitle,
+windowtitle .title,
+windowtitle .subtitle,
+frame > label {
+  color: #ffffff;
+}
+
+frame > border {
+  border: 3px double #ffffff;
+}
+
+entry,
+entry > text,
+textview.view,
+textview.view text,
+textview text {
+  background-color: #0000aa;
+  background-image: none;
+  color: #ffffff;
+  caret-color: #ffffff;
+}
+
+entry {
+  border: 1px solid #ffffff;
+  box-shadow: inset 1px 1px #000000;
+}
+
+entry.error,
+entry.error:focus,
+entry.error:focus-within {
+  border-color: #aa0000;
+}
+
+label.error {
+  color: #aa0000;
+}
+
+listview.view,
+gridview.view,
+columnview.view,
+treeview.view {
+  background-color: #00aaaa;
+  color: #000000;
+}
+
+listview.view > row:selected,
+gridview.view > child:selected,
+treeview.view:selected,
+entry selection,
+entry > text selection,
+textview text selection {
+  background-color: #aaaaaa;
+  color: #0000aa;
+}
+
+popover.menu modelbutton:hover,
+popover.menu modelbutton:selected {
+  background-color: #008800;
+  background-image: none;
+  color: #000000;
+}
+
+button:not(.flat):not(.link),
+button:not(.flat):not(.link):hover,
+button:not(.flat):not(.link):checked,
+button:not(.flat):not(.link):active {
+  background-color: #008800;
+  background-image: none;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  border-radius: 0;
+  box-shadow: 2px 2px #000000;
+}
+
+button:not(.flat):not(.link):hover {
+  background-color: #007700;
+}
+
+button:not(.flat):not(.link):checked {
+  background-color: #006600;
+  box-shadow: inset 2px 2px #003300;
+}
+
+button:not(.flat):not(.link):active {
+  background-color: #005500;
+  box-shadow: inset 2px 2px #003300;
+}
+
+button.destructive-action:not(.flat),
+button.destructive-action:not(.flat):hover,
+button.destructive-action:not(.flat):checked,
+button.destructive-action:not(.flat):active {
+  background-color: #aa0000;
+  color: #ffffff;
+}
+
+button.destructive-action:not(.flat):hover {
+  background-color: #880000;
+}
+
+button.destructive-action:not(.flat):checked,
+button.destructive-action:not(.flat):active {
+  background-color: #660000;
+  box-shadow: inset 2px 2px #330000;
+}
+
+button:not(.flat):not(.link):disabled,
+button.destructive-action:not(.flat):disabled {
+  background-color: #888888;
+  background-image: none;
+  color: #555555;
+  box-shadow: none;
+}
+
+check,
+radio,
+switch {
+  background-color: #00aaaa;
+  background-image: none;
+  color: #000000;
+  border: 1px solid #000000;
+}
+
+check:checked,
+radio:checked {
+  color: #ffffff;
+}
+
+scrollbar trough,
+scale trough,
+progressbar trough {
+  background-color: #00aaaa;
+  background-image: none;
+  border: 1px solid #0000aa;
+}
+
+scrollbar slider,
+scale slider,
+scale highlight,
+progressbar progress {
+  background-color: #0000aa;
+  background-image: none;
+  border: 1px solid #00aaaa;
+  box-shadow: none;
+}
+
+tooltip.background,
+tooltip.background label {
+  background-color: #aaaaaa;
+  background-image: none;
+  color: #000000;
+}
+
+tooltip.background {
+  border: 1px solid #ffffff;
+  border-radius: 0;
+  box-shadow: 2px 2px #000000;
+}

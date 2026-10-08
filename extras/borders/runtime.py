@@ -8,7 +8,7 @@ import re
 import shlex
 import subprocess
 import sys
-from gtk import GtkTheme
+from gtk import GtkTheme, Gtk4Theme
 
 
 ERRORS = (OSError, ValueError, RuntimeError, subprocess.CalledProcessError)
@@ -129,11 +129,14 @@ class Runtime:
         self.reload()
 
     def remove(self):
-        gtk_error = None
-        try:
-            GtkTheme(self.home).remove()
-        except ERRORS as error:
-            gtk_error = error
+        gtk_errors = []
+        for label, helper in (
+            ("GTK3", GtkTheme(self.home)), ("GTK4", Gtk4Theme(self.home))
+        ):
+            try:
+                helper.remove()
+            except ERRORS as error:
+                gtk_errors.append(f"{label}: {error}")
         for name in ("hyprland.lua", "hyprland.conf"):
             path = self.current / "theme" / name
             if path.is_file():
@@ -143,24 +146,28 @@ class Runtime:
                     path.write_text(base)
                     self.reload()
         self.unload()
-        if gtk_error:
-            raise gtk_error
+        if gtk_errors:
+            raise RuntimeError("; ".join(gtk_errors))
 
     def apply(self):
         status = {"active": [], "skipped": []}
         features = json.loads((self.data / "features.json").read_text())
-        if features.get("gtk") and (
-                self.current / "theme.name").read_text().strip() == "turbo-pascal":
-            try:
-                GtkTheme(self.home).apply()
-                status["active"].append("GTK3 styling")
-            except ERRORS as error:
+        active = (self.current / "theme.name").read_text().strip() == "turbo-pascal"
+        for feature, label, helper in (
+            ("gtk", "GTK3 styling", GtkTheme(self.home)),
+            ("gtk4", "GTK4/libadwaita styling", Gtk4Theme(self.home)),
+        ):
+            if features.get(feature) and active:
                 try:
-                    GtkTheme(self.home).remove()
-                except ERRORS as restore_error:
-                    self.warn(status, "GTK3 restoration", restore_error)
-                self.warn(status, "GTK3 styling", error)
-        if (self.current / "theme.name").read_text().strip() != "turbo-pascal":
+                    helper.apply()
+                    status["active"].append(label)
+                except ERRORS as error:
+                    try:
+                        helper.remove()
+                    except ERRORS as restore_error:
+                        self.warn(status, f"{label} restoration", restore_error)
+                    self.warn(status, label, error)
+        if not active:
             self.remove()
             status["dormant"] = True
         elif features["focus"] or features["borders"]:

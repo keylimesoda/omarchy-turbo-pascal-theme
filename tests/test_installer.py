@@ -40,6 +40,7 @@ class DesktopFixture:
         self.fail_enable = False
         self.fail_build = False
         self.gtk_theme = "'Adwaita-dark'"
+        self.gtk4_version = "4.22.4"
 
     def config(self):
         if self.instance.shell.is_file():
@@ -50,6 +51,8 @@ class DesktopFixture:
 
     def run(self, *args, capture=False):
         self.calls.append(args)
+        if args[:2] == ("python3", "-c"):
+            return self.gtk4_version
         if args == ("gsettings", "get", installer.GTK_SCHEMA, "gtk-theme"):
             return self.gtk_theme
         if args[:4] == ("gsettings", "set", installer.GTK_SCHEMA, "gtk-theme"):
@@ -82,6 +85,8 @@ class DesktopFixture:
             if features.get("gtk"):
                 installer.write_json(self.instance.data / "gtk-previous.json", {"theme": self.gtk_theme})
                 self.gtk_theme = repr(installer.GTK_THEME)
+            if features.get("gtk4"):
+                installer.Gtk4Theme(self.instance.home).apply()
             installer.write_json(self.instance.data / "runtime-status.json",
                                  {"active": ["focus effects"], "skipped": []})
         if args[0] == "bash" and args[-1] == "--unload":
@@ -90,6 +95,7 @@ class DesktopFixture:
                 if self.gtk_theme == repr(installer.GTK_THEME):
                     self.gtk_theme = installer.read_json(previous)["theme"]
                 previous.unlink()
+            installer.Gtk4Theme(self.instance.home).remove()
         if args[:3] == ("omarchy", "plugin", "enable"):
             if self.fail_enable:
                 raise subprocess.CalledProcessError(1, args)
@@ -766,7 +772,7 @@ class InstallerTests(unittest.TestCase):
         original = self.instance.shell.read_bytes()
         self.instance.install()
         self.assertEqual(installer.read_json(self.instance.data / "features.json"),
-                         {"focus": False, "borders": False, "gtk": True})
+                         {"focus": False, "borders": False, "gtk": True, "gtk4": True})
         self.assertEqual(self.instance.shell.read_bytes(), original)
         for event in ("theme-set", "post-boot"):
             self.assertTrue((self.instance.config / "hooks" /
@@ -793,6 +799,85 @@ class InstallerTests(unittest.TestCase):
         self.assertFalse(self.instance.state.get("gtk_restored"))
         self.instance.uninstall()
         self.assertEqual(self.desktop.gtk_theme, "'Personal GTK theme'")
+
+    def test_gtk4_payload_install_and_user_css_restoration(self):
+        styles = self.home / ".config/gtk-4.0/gtk.css"
+        styles.parent.mkdir()
+        original = b"/* my GTK4 CSS */\r\n"
+        styles.write_bytes(original)
+        self.instance.install()
+        self.assertEqual((self.instance.data / "gtk4.css").read_bytes(),
+                         (ROOT / "extras/gtk/gtk4.css").read_bytes())
+        self.assertIn("BEGIN TURBO PASCAL GTK4", styles.read_text())
+        with styles.open("a") as output:
+            output.write("/* my later edit */")
+        self.instance.uninstall()
+        self.assertEqual(styles.read_bytes(), original + b"/* my later edit */")
+
+    def test_skip_gtk_skips_both_toolkits(self):
+        self.instance.skip_gtk = True
+        self.instance.install()
+        features = installer.read_json(self.instance.data / "features.json")
+        self.assertFalse(features["gtk"])
+        self.assertFalse(features["gtk4"])
+        self.assertFalse((self.home / ".config/gtk-4.0").exists())
+
+    def test_skip_gtk4_retains_gtk3_styling(self):
+        self.instance.skip_gtk4 = True
+        self.instance.install()
+        features = installer.read_json(self.instance.data / "features.json")
+        self.assertTrue(features["gtk"])
+        self.assertFalse(features["gtk4"])
+        self.assertFalse((self.home / ".config/gtk-4.0").exists())
+
+    def test_old_gtk4_only_skips_gtk4_feature(self):
+        self.desktop.gtk4_version = "4.14.0"
+        self.instance.install()
+        self.assertFalse(self.instance.gtk4)
+        self.assertTrue(self.instance.gtk)
+        self.assertTrue(self.instance.focus)
+        self.assertTrue(self.instance.state["enabled"])
+
+    def test_gtk4_foreign_import_preserved_without_blocking_other_extras(self):
+        styles = self.home / ".config/gtk-4.0/gtk.css"
+        styles.parent.mkdir()
+        original = "/* BEGIN TURBO PASCAL GTK4 */\n/* another installation */"
+        styles.write_text(original)
+        self.instance.install()
+        self.assertFalse(self.instance.gtk4)
+        self.assertTrue(self.instance.gtk)
+        self.instance.uninstall()
+        self.assertEqual(styles.read_text(), original)
+
+    def test_gtk4_import_removed_on_install_rollback(self):
+        original = self.desktop.run
+        styles = self.home / ".config/gtk-4.0/gtk.css"
+
+        def fail_after_apply(*args, **kwargs):
+            result = original(*args, **kwargs)
+            if args[:3] == ("omarchy", "restart", "shell"):
+                raise subprocess.CalledProcessError(1, args)
+            return result
+
+        with patch.object(installer, "run", fail_after_apply):
+            with self.assertRaises(subprocess.CalledProcessError):
+                self.instance.install()
+        self.assertFalse(styles.exists())
+
+    def test_gtk4_cleanup_retry_preserves_later_manual_gtk3_selection(self):
+        (self.instance.current / "theme.name").write_text("turbo-pascal")
+        self.desktop.gtk_theme = "'Personal GTK theme'"
+        self.instance.install()
+        styles = self.home / ".config/gtk-4.0/gtk.css"
+        original = styles.read_text()
+        styles.write_text(original.replace("gtk4.css", "personal.css"))
+        with self.assertRaisesRegex(RuntimeError, "edited"):
+            self.instance.uninstall()
+        self.desktop.gtk_theme = "'Later GTK theme'"
+        styles.write_text(original)
+        self.instance.uninstall()
+        self.assertEqual(self.desktop.gtk_theme, "'Later GTK theme'")
+        self.assertFalse(styles.exists())
 
 
 if __name__ == "__main__":

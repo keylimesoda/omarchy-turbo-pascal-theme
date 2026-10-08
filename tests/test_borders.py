@@ -101,9 +101,11 @@ printf 'fixture binary\n' > "$FAKE_PLUGIN_DIR/borders-plus-plus.so"
     def tearDown(self):
         self.directory.cleanup()
 
-    def features(self, focus=True, borders=True, gtk=False):
+    def features(self, focus=True, borders=True, gtk=False, gtk4=False):
         (self.data / "features.json").write_text(json.dumps({
-            "focus": focus, "borders": borders, "gtk": gtk}))
+            "focus": focus, "borders": borders, "gtk": gtk, "gtk4": gtk4}))
+        if gtk4:
+            shutil.copy2(ROOT / "extras/gtk/gtk4.css", self.data)
         if gtk:
             path = self.home / ".local/share/themes/omarchy-turbo-pascal/gtk-3.0"
             path.mkdir(parents=True, exist_ok=True)
@@ -343,6 +345,46 @@ printf 'fixture binary\n' > "$FAKE_PLUGIN_DIR/borders-plus-plus.so"
         self.assertNotIn("BEGIN TURBO PASCAL", (self.current / "theme/hyprland.lua").read_text())
         self.assertIn("plugin unload", self.commands())
         self.assertTrue((self.data / "gtk-previous.json").exists())
+
+    def test_gtk4_only_activation_switching_and_removal(self):
+        self.features(focus=False, borders=False, gtk4=True)
+        styles = self.home / ".config/gtk-4.0/gtk.css"
+        self.assertEqual(self.invoke().returncode, 0)
+        self.assertEqual(self.status()["active"], ["GTK4/libadwaita styling"])
+        self.assertIn("BEGIN TURBO PASCAL GTK4", styles.read_text())
+        (self.current / "theme.name").write_text("haven")
+        self.assertEqual(self.invoke().returncode, 0)
+        self.assertFalse(styles.exists())
+        (self.current / "theme.name").write_text("turbo-pascal")
+        self.assertEqual(self.invoke().returncode, 0)
+        self.assertTrue(styles.exists())
+        self.assertEqual(self.invoke("--unload").returncode, 0)
+        self.assertFalse(styles.exists())
+
+    def test_gtk4_failure_does_not_block_gtk3_or_focus(self):
+        self.features(borders=False, gtk=True, gtk4=True)
+        styles = self.home / ".config/gtk-4.0/gtk.css"
+        styles.parent.mkdir(parents=True)
+        styles.write_text("/* BEGIN TURBO PASCAL GTK4 */\n/* user-owned */")
+        result = self.invoke()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.status()["active"], ["GTK3 styling", "focus effects"])
+        self.assertIn("GTK4 import is unrecognized", result.stderr)
+        self.assertEqual(styles.read_text(),
+                         "/* BEGIN TURBO PASCAL GTK4 */\n/* user-owned */")
+
+    def test_gtk4_restore_error_still_removes_native_and_gtk3_effects(self):
+        self.features(gtk=True, gtk4=True)
+        self.assertEqual(self.invoke().returncode, 0)
+        styles = self.home / ".config/gtk-4.0/gtk.css"
+        styles.write_text(styles.read_text().replace("gtk4.css", "changed.css"))
+        result = self.invoke("--unload")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("GTK4 import is unrecognized or edited", result.stderr)
+        self.assertEqual(self.gtk_value.read_text(), "'Adwaita-dark'")
+        self.assertNotIn("BEGIN TURBO PASCAL EXTRAS", self.native.read_text())
+        self.assertIn("plugin unload", self.commands())
+        self.assertTrue((self.data / "gtk4-previous.json").exists())
 
 
 if __name__ == "__main__":
