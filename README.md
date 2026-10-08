@@ -79,12 +79,13 @@ redesign.
 - Square corners for **Super+O** popped-out windows, overriding Omarchy's rounded
   pop-window rule while Turbo Pascal's native focus styling is active.
 
-![Native GTK3 control demo with gray panels, a DOS-blue Pascal editor, a cyan file list, green buttons and a red Reset button](docs/gtk-apps.png)
+![Microsoft Edge using Turbo Pascal's gray GTK browser chrome and a green Downloads menu highlight](docs/edge-gtk.png)
 
-A native GTK3 control demo rendered with the installed theme, not a browser
-mockup. Edge also picks up the app colors with
-**Settings → Appearance → Overall appearance → GTK**. Website contents and
-GTK4/libadwaita apps are unchanged.
+Edge in GTK appearance mode, with gray browser chrome and a green menu highlight.
+Select **Settings → Appearance → Overall appearance → GTK** to use the app
+colors. Website contents and GTK4/libadwaita apps are unchanged.
+
+[Native GTK3 control preview](docs/gtk-apps.png)
 
 ## Optional extension
 
