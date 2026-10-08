@@ -181,10 +181,14 @@ class Runtime:
                             if not match:
                                 raise RuntimeError(f"Unknown rule syntax for {version}")
                             if (int(match[1]), int(match[2])) < (0, 53):
-                                content = re.sub(r"windowrule \{.*?\}",
-                                                 "windowrulev2 = opacity 0.97 override,"
-                                                 "tag:default-opacity,focus:0,fullscreen:0",
-                                                 content, flags=re.S)
+                                for name, rule in (
+                                    ("inactive-opacity", "opacity 0.97 override,"
+                                     "tag:default-opacity,focus:0,fullscreen:0"),
+                                    ("pop-square", "rounding 0,tag:pop"),
+                                ):
+                                    content = re.sub(
+                                        rf"windowrule \{{\s*name = turbo-pascal-{name}\b.*?\}}",
+                                        f"windowrulev2 = {rule}", content, flags=re.S)
                         self.write(path, base, content)
                         status["active"].append("focus effects")
                     except ERRORS as error:

@@ -76,6 +76,8 @@ redesign.
   windows, intrinsic transparency and later user rules are preserved.
 - Gentle 275 ms ease-out fades for opacity and dimming, without bounce or
   desaturation. Other window and workspace animations keep Omarchy's defaults.
+- Square corners for **Super+O** popped-out windows, overriding Omarchy's rounded
+  pop-window rule while Turbo Pascal's native focus styling is active.
 
 ![Native GTK3 control demo with gray panels, a DOS-blue Pascal editor, a cyan file list, green buttons and a red Reset button](docs/gtk-apps.png)
 
@@ -103,7 +105,7 @@ borders have narrower compatibility than native focus effects.
 | `--allow-untested` | Try other versions; never bypass compositor/header ABI checks |
 | `--skip-widgets` | Keep your existing widgets |
 | `--skip-borders` | Omit the compiled window-border plugin |
-| `--skip-focus` | Keep existing opacity, dimming and focus animations |
+| `--skip-focus` | Keep existing opacity, dimming, focus animations and popped-window corners |
 | `--skip-gtk` | Keep existing GTK3 application and browser styling |
 
 Pass options to `./install.sh`; they can be combined.

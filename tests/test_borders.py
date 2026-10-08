@@ -138,6 +138,9 @@ printf 'fixture binary\n' > "$FAKE_PLUGIN_DIR/borders-plus-plus.so"
         self.assertTrue(native.startswith(BASE))
         self.assertIn('opacity = "0.97 override"', native)
         self.assertIn('focus = false, fullscreen = false', native)
+        self.assertIn('name = "turbo-pascal-pop-square"', native)
+        self.assertIn('match = { tag = "pop" }', native)
+        self.assertIn("rounding = 0", native)
         self.assertNotIn("inactive_opacity", native)
         self.assertIn("active_only = true", native)
         self.assertEqual(self.status()["active"], ["focus effects", "double borders"])
@@ -276,6 +279,8 @@ printf 'fixture binary\n' > "$FAKE_PLUGIN_DIR/borders-plus-plus.so"
         content = self.native.read_text()
         self.assertTrue(content.startswith("# generated base stays\n"))
         self.assertIn("windowrulev2 = opacity 0.97 override,tag:default-opacity,focus:0,fullscreen:0", content)
+        self.assertIn("windowrulev2 = rounding 0,tag:pop", content)
+        self.assertEqual(content.count("windowrulev2 = opacity"), 1)
         self.assertNotIn("windowrule {", content)
 
     def test_legacy_053_uses_named_rule(self):
@@ -289,6 +294,9 @@ printf 'fixture binary\n' > "$FAKE_PLUGIN_DIR/borders-plus-plus.so"
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("windowrule {", self.native.read_text())
         self.assertIn("match:focus = false", self.native.read_text())
+        self.assertIn("name = turbo-pascal-pop-square", self.native.read_text())
+        self.assertIn("match:tag = pop", self.native.read_text())
+        self.assertIn("rounding = 0", self.native.read_text())
 
     def test_missing_generated_theme_reports_skip(self):
         self.native.unlink()
