@@ -18,7 +18,7 @@ and dimmed, slightly transparent inactive windows.
 omarchy theme install https://github.com/keylimesoda/omarchy-turbo-pascal-theme.git
 ```
 
-**Optional extras:** double borders, styled buttons and focus fades.
+**Optional extras:** double borders, styled widgets, GTK3 app colors and focus fades.
 
 ```bash
 cd ~/.config/omarchy/themes/turbo-pascal
@@ -38,8 +38,8 @@ cd ~/.config/omarchy/themes/turbo-pascal
 ./uninstall.sh
 ```
 
-This removes the extras and restores your previous shell settings. **The base
-theme stays installed.**
+This removes the extras and restores your previous shell and GTK theme settings.
+**The base theme stays installed.**
 
 ## What's included
 
@@ -49,6 +49,8 @@ theme stays installed.**
   cyan directory names. Normal ANSI green appears yellow; widget buttons keep
   their own green fills.
 - Gray bar, popup and menu colors, plus supported shell control colors/states.
+- Gray browser tint where Omarchy's browser color policy is supported.
+  Edge uses the optional GTK3 styling instead.
 - Ordinary white focused-window borders and gray inactive-window borders.
 - Seventeen static 4K wallpapers: IDE workspaces, Pascal source, a DOS prompt,
   text-mode scenery, mathematical geometry, and a DOS-colored Omarchy logo.
@@ -66,6 +68,11 @@ redesign.
 - Raised green buttons with white labels; selected buttons are darker and
   recessed.
 - Styled menus with gray panels and green selections.
+- GTK3 styling: gray panels, blue editing areas, cyan/blue scrollbars and lists,
+  white dialog titles/field labels and outlines, black shadows, raised/recessed
+  green buttons, and sparse red error/destructive-action accents. Edge picks up
+  the browser UI colors with **Settings → Appearance → Overall appearance → GTK**.
+  Website contents and GTK4/libadwaita apps are unchanged.
 - 17% inactive dimming and a 97% compositor-opacity target for ordinary inactive
   windows, without another opacity multiplier. Application opt-outs, fullscreen
   windows, intrinsic transparency and later user rules are preserved.
@@ -95,6 +102,7 @@ borders have narrower compatibility than native focus effects.
 | `--skip-widgets` | Keep your existing widgets |
 | `--skip-borders` | Omit the compiled window-border plugin |
 | `--skip-focus` | Keep existing opacity, dimming and focus animations |
+| `--skip-gtk` | Keep existing GTK3 application and browser styling |
 
 Pass options to `./install.sh`; they can be combined.
 
@@ -119,8 +127,9 @@ dependencies; no precompiled plugin binary is distributed.
 |---|---|
 | `~/.config/omarchy/plugins/turbo-pascal.*/` | User-owned widget clones and shared styling library |
 | `~/.config/omarchy/shell.json` | Switch existing supported widgets to those clones; keep the selected bar |
-| `~/.config/omarchy/hooks/{theme-set,post-boot}.d/turbo-pascal-borders` | Theme-aware native effects and border loading |
-| `~/.local/share/omarchy-turbo-pascal/` | Focus settings, border source, locally built plugin and runtime status |
+| `~/.config/omarchy/hooks/{theme-set,post-boot}.d/turbo-pascal-borders` | Theme-aware GTK3 styling, focus effects and border loading |
+| `~/.local/share/omarchy-turbo-pascal/` | GTK selection helper, focus settings, border source, locally built plugin and runtime status |
+| `~/.local/share/themes/omarchy-turbo-pascal/` | Optional GTK3 theme, selected only while Turbo Pascal is active |
 | `~/.local/state/omarchy/turbo-pascal-install/` | Installation record and backups |
 
 Existing widget positions, options, unrelated plugins, and idle settings are
@@ -136,6 +145,19 @@ OmaSettings. A bar you selected yourself is also left unchanged. The
 `turbo-pascal.bar/DosUi/` directory is only a shared widget styling library;
 the installer does not copy its bar engine or register a replacement bar.
 
+GTK3 styling applies to GTK3 apps as well as browsers using GTK appearance.
+It imports the installed Adwaita-dark base, adding Turbo Pascal colors and
+controls without overwriting existing GTK stylesheets. System light/dark mode
+is unchanged. Existing files at our GTK theme path cause that extra to be
+skipped. Switching themes removes our GTK selection; uninstall restores the
+previous selection and removes our GTK theme files. Later manual GTK-theme
+choices are preserved. Some apps may need reopening to pick up a theme change.
+The control colors follow the
+[Turbo Pascal screenshot references](https://ilyabirman.net/meanwhile/all/ui-museum-turbo-pascal-7-1/),
+with the existing theme's darker green/white-label button treatment retained.
+Red accents mark errors and destructive actions, rather than individual menu
+mnemonic letters, which GTK CSS cannot reliably target.
+
 An existing `borders-plus-plus` installation skips our window borders, not the
 other extras. Conflicting hooks/runtime files and symlinked installation targets
 stop installation rather than being overwritten.
@@ -149,8 +171,8 @@ and fall back to the next theme's normal palette.
 
 ### Removal and updates
 
-Uninstall restores shell settings and removes the owned plugins, hooks and
-border runtime. The base theme stays installed; if it is active, Omarchy
+Uninstall restores shell and GTK theme settings and removes the owned plugins,
+GTK theme, hooks and border runtime. The base theme stays installed; if it is active, Omarchy
 reapplies its standard appearance. Later bar-layout and widget-option edits are
 kept. Previously selected custom components are restored when still applicable.
 

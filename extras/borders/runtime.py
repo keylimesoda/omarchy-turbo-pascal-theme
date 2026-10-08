@@ -8,6 +8,7 @@ import re
 import shlex
 import subprocess
 import sys
+from gtk import GtkTheme
 
 
 ERRORS = (OSError, ValueError, RuntimeError, subprocess.CalledProcessError)
@@ -128,6 +129,11 @@ class Runtime:
         self.reload()
 
     def remove(self):
+        gtk_error = None
+        try:
+            GtkTheme(self.home).remove()
+        except ERRORS as error:
+            gtk_error = error
         for name in ("hyprland.lua", "hyprland.conf"):
             path = self.current / "theme" / name
             if path.is_file():
@@ -137,10 +143,23 @@ class Runtime:
                     path.write_text(base)
                     self.reload()
         self.unload()
+        if gtk_error:
+            raise gtk_error
 
     def apply(self):
         status = {"active": [], "skipped": []}
         features = json.loads((self.data / "features.json").read_text())
+        if features.get("gtk") and (
+                self.current / "theme.name").read_text().strip() == "turbo-pascal":
+            try:
+                GtkTheme(self.home).apply()
+                status["active"].append("GTK3 styling")
+            except ERRORS as error:
+                try:
+                    GtkTheme(self.home).remove()
+                except ERRORS as restore_error:
+                    self.warn(status, "GTK3 restoration", restore_error)
+                self.warn(status, "GTK3 styling", error)
         if (self.current / "theme.name").read_text().strip() != "turbo-pascal":
             self.remove()
             status["dormant"] = True

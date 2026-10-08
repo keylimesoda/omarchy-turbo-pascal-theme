@@ -39,6 +39,7 @@ class DesktopFixture:
         self.plugins = []
         self.fail_enable = False
         self.fail_build = False
+        self.gtk_theme = "'Adwaita-dark'"
 
     def config(self):
         if self.instance.shell.is_file():
@@ -49,6 +50,11 @@ class DesktopFixture:
 
     def run(self, *args, capture=False):
         self.calls.append(args)
+        if args == ("gsettings", "get", installer.GTK_SCHEMA, "gtk-theme"):
+            return self.gtk_theme
+        if args[:4] == ("gsettings", "set", installer.GTK_SCHEMA, "gtk-theme"):
+            self.gtk_theme = args[4]
+            return ""
         if args == ("omarchy", "version"):
             return self.omarchy_version
         if args == ("hyprctl", "version", "-j"):
@@ -72,8 +78,18 @@ class DesktopFixture:
                                 "enabled": item["id"] in installer.active_ids(self.config())})
             return json.dumps(catalog)
         if args[0] == "bash" and "apply-borders" in args[1] and args[-1] not in ("--build", "--unload"):
+            features = installer.read_json(self.instance.data / "features.json")
+            if features.get("gtk"):
+                installer.write_json(self.instance.data / "gtk-previous.json", {"theme": self.gtk_theme})
+                self.gtk_theme = repr(installer.GTK_THEME)
             installer.write_json(self.instance.data / "runtime-status.json",
                                  {"active": ["focus effects"], "skipped": []})
+        if args[0] == "bash" and args[-1] == "--unload":
+            previous = self.instance.data / "gtk-previous.json"
+            if previous.is_file():
+                if self.gtk_theme == repr(installer.GTK_THEME):
+                    self.gtk_theme = installer.read_json(previous)["theme"]
+                previous.unlink()
         if args[:3] == ("omarchy", "plugin", "enable"):
             if self.fail_enable:
                 raise subprocess.CalledProcessError(1, args)
@@ -118,6 +134,7 @@ class DesktopFixture:
             target.chmod(0o755)
         elif args[:3] == ("omarchy", "theme", "set"):
             (self.instance.current / "theme.name").write_text(args[3])
+            self.gtk_theme = "'Adwaita-dark'"
         elif args[:2] == ("git", "clone"):
             if self.fail_build:
                 raise subprocess.CalledProcessError(1, args)
@@ -166,6 +183,8 @@ class InstallerTests(unittest.TestCase):
         for name in ("runtime.py", "focus.conf", "client-hash.cpp", "apply-borders"):
             self.assertEqual((self.instance.data / name).read_bytes(),
                              (ROOT / "extras/borders" / name).read_bytes())
+        self.assertEqual((self.instance.data / "gtk.py").read_bytes(),
+                         (ROOT / "extras/gtk/gtk.py").read_bytes())
         self.assertEqual(
             (self.instance.theme / "licenses/scarecrow-bbs-NOTICE.txt").read_bytes(),
             (ROOT / "licenses/scarecrow-bbs-NOTICE.txt").read_bytes(),
@@ -645,6 +664,135 @@ class InstallerTests(unittest.TestCase):
         self.assertFalse(self.instance.data.exists())
         self.assertTrue(self.instance.theme.exists())
         self.assertEqual(self.instance.state["status"], "rolled-back")
+
+    def test_gtk_install_preserves_dark_mode_and_removes_files_on_uninstall(self):
+        self.desktop.gtk_theme = "'Personal GTK theme'"
+        self.instance.install()
+        target = self.instance.gtk_theme / "gtk-3.0"
+        for name in ("gtk.css", "gtk-dark.css"):
+            self.assertEqual((target / name).read_bytes(), (ROOT / "extras/gtk/gtk.css").read_bytes())
+        self.assertEqual(self.desktop.gtk_theme, repr(installer.GTK_THEME))
+        self.instance.uninstall()
+        self.assertEqual(self.desktop.gtk_theme, "'Adwaita-dark'")
+        self.assertFalse(self.instance.gtk_theme.exists())
+        self.assertFalse(any(call[0] == "gsettings" and "color-scheme" in call
+                             for call in self.desktop.calls))
+
+    def test_gtk_original_selection_restored_even_after_base_refresh(self):
+        (self.instance.current / "theme.name").write_text("turbo-pascal")
+        self.desktop.gtk_theme = "'Personal GTK theme'"
+        self.instance.install()
+        self.instance.uninstall()
+        self.assertEqual(self.desktop.gtk_theme, "'Personal GTK theme'")
+
+    def test_gtk_manual_selection_is_not_overwritten_on_uninstall(self):
+        self.instance.install()
+        self.desktop.gtk_theme = "'Later GTK choice'"
+        self.instance.uninstall()
+        self.assertEqual(self.desktop.gtk_theme, "'Later GTK choice'")
+
+    def test_gtk_restoration_retries_after_native_theme_refresh_failure(self):
+        (self.instance.current / "theme.name").write_text("turbo-pascal")
+        self.desktop.gtk_theme = "'Personal GTK theme'"
+        self.instance.install()
+        original = self.desktop.run
+
+        def fail_refresh(*args, **kwargs):
+            if args[:3] == ("omarchy", "theme", "set"):
+                raise subprocess.CalledProcessError(1, args)
+            return original(*args, **kwargs)
+
+        with patch.object(installer, "run", fail_refresh):
+            with self.assertRaises(subprocess.CalledProcessError):
+                self.instance.uninstall()
+        self.assertFalse(self.instance.gtk_theme.exists())
+        self.instance.uninstall()
+        self.assertEqual(self.desktop.gtk_theme, "'Personal GTK theme'")
+
+    def test_gtk_manual_choice_after_failed_uninstall_survives_retry(self):
+        self.instance.install()
+        original = self.desktop.run
+
+        def fail_refresh(*args, **kwargs):
+            result = original(*args, **kwargs)
+            if args[:3] == ("omarchy", "theme", "set"):
+                raise subprocess.CalledProcessError(1, args)
+            return result
+
+        with patch.object(installer, "run", fail_refresh):
+            with self.assertRaises(subprocess.CalledProcessError):
+                self.instance.uninstall()
+        self.desktop.gtk_theme = "'New manual GTK choice'"
+        self.instance.uninstall()
+        self.assertEqual(self.desktop.gtk_theme, "'New manual GTK choice'")
+
+    def test_skip_gtk_leaves_gtk_configurations_and_theme_selection_untouched(self):
+        self.instance.skip_gtk = True
+        self.instance.install()
+        self.assertFalse(self.instance.gtk_theme.exists())
+        self.assertFalse(installer.read_json(self.instance.data / "features.json")["gtk"])
+        self.assertFalse(any(call[0] == "gsettings" for call in self.desktop.calls))
+
+    def test_existing_gtk_theme_is_kept_and_other_extras_still_install(self):
+        self.instance.gtk_theme.mkdir(parents=True)
+        original = self.instance.gtk_theme / "personal.txt"
+        original.write_text("keep")
+        self.instance.install()
+        self.assertFalse(self.instance.gtk)
+        self.assertTrue(self.instance.state["enabled"])
+        self.instance.uninstall()
+        self.assertEqual(original.read_text(), "keep")
+
+    def test_missing_gsettings_only_skips_gtk(self):
+        with patch.object(installer.shutil, "which",
+                          side_effect=lambda name: None if name == "gsettings" else "/bin/fixture"):
+            self.instance.install()
+        self.assertFalse(self.instance.gtk)
+        self.assertTrue(self.instance.focus)
+        self.assertTrue(self.instance.state["enabled"])
+
+    def test_gtk_runtime_marker_and_python_cache_do_not_block_uninstall(self):
+        self.instance.install()
+        cache = self.instance.data / "__pycache__"
+        cache.mkdir()
+        (cache / "gtk.pyc").write_bytes(b"cache")
+        self.instance.uninstall()
+        self.assertFalse(self.instance.data.exists())
+
+    def test_gtk_only_install_and_uninstall_preserve_existing_widgets(self):
+        self.instance.skip_widgets = True
+        self.instance.skip_focus = True
+        self.instance.skip_borders = True
+        original = self.instance.shell.read_bytes()
+        self.instance.install()
+        self.assertEqual(installer.read_json(self.instance.data / "features.json"),
+                         {"focus": False, "borders": False, "gtk": True})
+        self.assertEqual(self.instance.shell.read_bytes(), original)
+        for event in ("theme-set", "post-boot"):
+            self.assertTrue((self.instance.config / "hooks" /
+                            f"{event}.d/turbo-pascal-borders").is_file())
+        self.instance.uninstall()
+        self.assertEqual(self.instance.shell.read_bytes(), original)
+        self.assertFalse(self.instance.gtk_theme.exists())
+        self.assertFalse(self.instance.data.exists())
+
+    def test_gtk_no_op_restore_is_reported_and_retryable(self):
+        (self.instance.current / "theme.name").write_text("turbo-pascal")
+        self.desktop.gtk_theme = "'Personal GTK theme'"
+        self.instance.install()
+        original = self.desktop.run
+
+        def no_op_restore(*args, **kwargs):
+            if args[:4] == ("gsettings", "set", installer.GTK_SCHEMA, "gtk-theme"):
+                return ""
+            return original(*args, **kwargs)
+
+        with patch.object(installer, "run", no_op_restore):
+            with self.assertRaisesRegex(RuntimeError, "selection was not restored"):
+                self.instance.uninstall()
+        self.assertFalse(self.instance.state.get("gtk_restored"))
+        self.instance.uninstall()
+        self.assertEqual(self.desktop.gtk_theme, "'Personal GTK theme'")
 
 
 if __name__ == "__main__":

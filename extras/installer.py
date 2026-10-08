@@ -12,6 +12,8 @@ import subprocess
 import sys
 import tempfile
 import time
+sys.path.insert(0, str(Path(__file__).resolve().parent / "gtk"))
+from gtk import THEME as GTK_THEME, SCHEMA as GTK_SCHEMA
 
 
 PACKAGE = Path(__file__).resolve().parent.parent
@@ -60,11 +62,13 @@ def fingerprint(path, runtime=False):
         relative = entry.relative_to(path)
         if runtime and (
             relative.parts[:2] == ("hyprland-plugins", ".git")
+            or relative.parts[0] == "__pycache__"
             or relative.as_posix() in (
                 "plugin-session",
                 "runtime-status.json",
                 "build-hash",
                 "client-hash",
+                "gtk-previous.json",
                 "hyprland-plugins/borders-plus-plus/borders-plus-plus.so",
             )
         ):
@@ -106,7 +110,7 @@ def wait_shell():
 
 class Installer:
     def __init__(self, home=None, package=PACKAGE, allow_untested=False,
-                 skip_widgets=False, skip_borders=False, skip_focus=False, confirm=None):
+                 skip_widgets=False, skip_borders=False, skip_focus=False, skip_gtk=False, confirm=None):
         self.home = (home or Path.home()).resolve()
         self.package = package
         self.config = self.home / ".config/omarchy"
@@ -121,6 +125,8 @@ class Installer:
         self.skip_widgets = skip_widgets
         self.skip_borders = skip_borders
         self.skip_focus = skip_focus
+        self.skip_gtk = skip_gtk
+        self.gtk_theme = self.home / ".local/share/themes" / GTK_THEME
         self.confirm = confirm or confirm_replacement
         self.modules = {}
         self.skipped = []
@@ -190,6 +196,18 @@ class Installer:
             raise RuntimeError("Run inside your Hyprland desktop session.")
         self.focus = not self.skip_focus
         self.borders = not self.skip_borders
+        self.gtk = not self.skip_gtk
+        if self.gtk:
+            try:
+                if not shutil.which("gsettings"):
+                    raise RuntimeError("gsettings is unavailable")
+                run("gsettings", "get", GTK_SCHEMA, "gtk-theme", capture=True)
+                self.safe_path(self.gtk_theme)
+                if self.gtk_theme.exists():
+                    raise RuntimeError(f"an existing GTK theme would be overwritten: {self.gtk_theme}")
+            except (OSError, RuntimeError, subprocess.CalledProcessError) as error:
+                self.gtk = False
+                self.skip("GTK3 styling", str(error))
         errors = run("hyprctl", "configerrors", capture=True)
         if errors:
             self.focus = self.borders = False
@@ -305,7 +323,8 @@ class Installer:
         self.preflight(check)
         if check:
             print(f"Available: {len(self.modules)} widget enhancements; "
-                  f"focus effects={self.focus}; border build candidate={self.borders}. Nothing changed.")
+                  f"focus effects={self.focus}; border build candidate={self.borders}; "
+                  f"GTK3 styling={self.gtk}. Nothing changed.")
             return
         if self.state_dir.exists():
             archive = self.state_dir.with_name(f"{self.state_dir.name}-backup-{time.time_ns()}")
@@ -324,7 +343,9 @@ class Installer:
             shutil.copy2(self.package / "hyprland.lua", self.data)
             for name in ("runtime.py", "focus.conf", "client-hash.cpp"):
                 shutil.copy2(self.package / "extras/borders" / name, self.data)
-            write_json(self.data / "features.json", {"focus": self.focus, "borders": self.borders})
+            shutil.copy2(self.package / "extras/gtk/gtk.py", self.data)
+            write_json(self.data / "features.json", {
+                "focus": self.focus, "borders": self.borders, "gtk": self.gtk})
             self.finish_record(data_record)
             if self.borders:
                 try:
@@ -333,8 +354,16 @@ class Installer:
                     self.borders = False
                     self.skip("double borders", f"build unavailable or incompatible: {error}")
                 finally:
-                    write_json(self.data / "features.json", {"focus": self.focus, "borders": self.borders})
+                    write_json(self.data / "features.json", {
+                        "focus": self.focus, "borders": self.borders, "gtk": self.gtk})
                     self.finish_record(data_record)
+            if self.gtk:
+                record = self.snapshot(self.gtk_theme)
+                target = self.gtk_theme / "gtk-3.0"
+                target.mkdir(parents=True)
+                for name in ("gtk.css", "gtk-dark.css"):
+                    shutil.copy2(self.package / "extras/gtk/gtk.css", target / name)
+                self.finish_record(record)
             # Keep the existing import path, but install no replacement-bar manifest or engine.
             copied = (["bar"] + list(self.modules)) if self.modules else []
             for module in copied:
@@ -438,6 +467,7 @@ class Installer:
         self.state["status"] = "rolling-back"
         self.save()
         unload_error = None
+        self.prepare_gtk_restore()
         if (self.data / "apply-borders").is_file():
             try:
                 run("bash", str(self.data / "apply-borders"), "--unload")
@@ -447,7 +477,8 @@ class Installer:
         for record in reversed(self.state["records"]):
             if not (unload_error and record["runtime"]):
                 self.restore_record(record)
-        run("omarchy", "theme", "set", self.state["previous_theme"])
+        self.refresh_theme_for_cleanup(self.state["previous_theme"])
+        self.finish_gtk_restore()
         if self.modules:
             run("omarchy", "restart", "shell")
             wait_shell()
@@ -475,6 +506,7 @@ class Installer:
                     "the installed version before uninstalling; no more files were removed.")
         self.state["status"] = "rolling-back" if rolling_back else "uninstalling"
         self.save()
+        self.prepare_gtk_restore()
         if (self.data / "apply-borders").is_file():
             run("bash", str(self.data / "apply-borders"), "--unload")
         current_theme = (self.current / "theme.name").read_text().strip()
@@ -518,15 +550,49 @@ class Installer:
         if current_theme == "turbo-pascal" and not self.state.get("theme_refreshed"):
             theme = ("turbo-pascal" if self.state.get("version") == 2 and not rolling_back
                      else self.state["previous_theme"])
-            run("omarchy", "theme", "set", theme)
+            self.refresh_theme_for_cleanup(theme)
             self.state["theme_refreshed"] = True
             self.save()
+        if current_theme == "turbo-pascal" or rolling_back:
+            self.finish_gtk_restore()
         if shell_record:
             run("omarchy", "restart", "shell")
             wait_shell()
         self.state["status"] = "rolled-back" if rolling_back else "uninstalled"
         self.save()
         print(f"Companion customizations removed. Backups retained at {self.state_dir}.")
+
+    def prepare_gtk_restore(self):
+        previous = self.data / "gtk-previous.json"
+        if "gtk_last_selection" in self.state:
+            selected = run("gsettings", "get", GTK_SCHEMA, "gtk-theme", capture=True)
+            if selected != self.state["gtk_last_selection"]:
+                self.state["gtk_restore"] = selected
+                self.state["gtk_restored"] = False
+                self.save()
+        elif previous.is_file() and "gtk_restore" not in self.state:
+            selected = run("gsettings", "get", GTK_SCHEMA, "gtk-theme", capture=True)
+            self.state["gtk_restore"] = (
+                read_json(previous)["theme"] if selected == repr(GTK_THEME) else selected)
+            self.save()
+
+    def refresh_theme_for_cleanup(self, theme):
+        try:
+            run("omarchy", "theme", "set", theme)
+        finally:
+            if "gtk_restore" in self.state:
+                self.state["gtk_last_selection"] = run(
+                    "gsettings", "get", GTK_SCHEMA, "gtk-theme", capture=True)
+                self.save()
+
+    def finish_gtk_restore(self):
+        if "gtk_restore" in self.state and not self.state.get("gtk_restored"):
+            run("gsettings", "set", GTK_SCHEMA, "gtk-theme", self.state["gtk_restore"])
+            if run("gsettings", "get", GTK_SCHEMA, "gtk-theme", capture=True) != self.state["gtk_restore"]:
+                raise RuntimeError("Previous GTK theme selection was not restored; retry uninstall.")
+            self.state["gtk_restored"] = True
+            self.state["gtk_last_selection"] = self.state["gtk_restore"]
+            self.save()
 
 
 def read_json_text(text):
@@ -548,10 +614,12 @@ def main():
     parser.add_argument("--skip-widgets", action="store_true", help="Keep existing widgets")
     parser.add_argument("--skip-borders", action="store_true", help="Do not build the window-border plugin")
     parser.add_argument("--skip-focus", action="store_true", help="Keep existing opacity, dimming and animations")
+    parser.add_argument("--skip-gtk", action="store_true", help="Keep existing GTK3 application and browser styling")
     args = parser.parse_args()
     try:
         installer = Installer(allow_untested=args.allow_untested, skip_widgets=args.skip_widgets,
-                              skip_borders=args.skip_borders, skip_focus=args.skip_focus)
+                              skip_borders=args.skip_borders, skip_focus=args.skip_focus,
+                              skip_gtk=args.skip_gtk)
         if args.action == "install":
             installer.install(args.check)
         elif args.check:

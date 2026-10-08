@@ -19,6 +19,7 @@ class BorderHookTests(unittest.TestCase):
         self.data.mkdir(parents=True)
         for name in ("runtime.py", "focus.conf", "client-hash.cpp"):
             shutil.copy2(ROOT / "extras/borders" / name, self.data)
+        shutil.copy2(ROOT / "extras/gtk/gtk.py", self.data)
         shutil.copy2(ROOT / "hyprland.lua", self.data)
         self.features()
         self.current = self.home / ".local/state/omarchy/current"
@@ -31,6 +32,16 @@ class BorderHookTests(unittest.TestCase):
         self.log = self.home / "commands.log"
         self.bin = self.home / "bin"
         self.bin.mkdir()
+        self.gtk_value = self.home / "gtk-value"
+        self.gtk_value.write_text("'Adwaita-dark'")
+        self.command("gsettings", r'''
+printf 'gsettings %s\n' "$*" >> "$FAKE_LOG"
+if [ "$1" = get ]; then
+  cat "$FAKE_GTK"
+elif [ "${FAKE_GTK_ERROR:-0}" != 1 ]; then
+  printf '%s' "$4" > "$FAKE_GTK"
+fi
+''')
         self.command("hyprctl", r'''
 printf 'hyprctl %s\n' "$*" >> "$FAKE_LOG"
 case "$1 ${2:-}" in
@@ -84,13 +95,19 @@ printf 'fixture binary\n' > "$FAKE_PLUGIN_DIR/borders-plus-plus.so"
             "FAKE_LOADED": str(self.loaded), "FAKE_LOG": str(self.log),
             "FAKE_NATIVE": str(self.native),
             "FAKE_PLUGIN_DIR": str(self.data / "hyprland-plugins/borders-plus-plus"),
+            "FAKE_GTK": str(self.gtk_value),
         }
 
     def tearDown(self):
         self.directory.cleanup()
 
-    def features(self, focus=True, borders=True):
-        (self.data / "features.json").write_text(json.dumps({"focus": focus, "borders": borders}))
+    def features(self, focus=True, borders=True, gtk=False):
+        (self.data / "features.json").write_text(json.dumps({
+            "focus": focus, "borders": borders, "gtk": gtk}))
+        if gtk:
+            path = self.home / ".local/share/themes/omarchy-turbo-pascal/gtk-3.0"
+            path.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(ROOT / "extras/gtk/gtk.css", path)
 
     def command(self, name, text):
         path = self.bin / name
@@ -279,6 +296,45 @@ printf 'fixture binary\n' > "$FAKE_PLUGIN_DIR/borders-plus-plus.so"
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("No generated Hyprland theme", result.stderr)
         self.assertEqual(self.status()["active"], [])
+
+    def test_gtk_only_activation_switching_and_reactivation(self):
+        self.features(focus=False, borders=False, gtk=True)
+        result = self.invoke()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.status()["active"], ["GTK3 styling"])
+        self.assertEqual(self.gtk_value.read_text(), "'omarchy-turbo-pascal'")
+        self.assertNotIn("plugin load", self.commands())
+        self.assertNotIn("color-scheme", self.commands())
+        (self.current / "theme.name").write_text("haven")
+        self.gtk_value.write_text("'Adwaita'")
+        self.assertEqual(self.invoke().returncode, 0)
+        self.assertEqual(self.gtk_value.read_text(), "'Adwaita'")
+        (self.current / "theme.name").write_text("turbo-pascal")
+        self.gtk_value.write_text("'Adwaita-dark'")
+        self.assertEqual(self.invoke().returncode, 0)
+        self.assertEqual(self.gtk_value.read_text(), "'omarchy-turbo-pascal'")
+        self.assertEqual(self.invoke("--unload").returncode, 0)
+        self.assertEqual(self.gtk_value.read_text(), "'Adwaita-dark'")
+
+    def test_gtk_setting_failure_keeps_focus_effects_and_reports_skip(self):
+        self.features(borders=False, gtk=True)
+        self.env["FAKE_GTK_ERROR"] = "1"
+        result = self.invoke()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.status()["active"], ["focus effects"])
+        self.assertIn("GTK theme selection did not take effect", result.stderr)
+        self.assertEqual(self.gtk_value.read_text(), "'Adwaita-dark'")
+
+    def test_failed_gtk_restore_still_removes_native_effects(self):
+        self.features(gtk=True)
+        self.assertEqual(self.invoke().returncode, 0)
+        self.env["FAKE_GTK_ERROR"] = "1"
+        result = self.invoke("--unload")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("GTK theme selection did not take effect", result.stderr)
+        self.assertNotIn("BEGIN TURBO PASCAL", (self.current / "theme/hyprland.lua").read_text())
+        self.assertIn("plugin unload", self.commands())
+        self.assertTrue((self.data / "gtk-previous.json").exists())
 
 
 if __name__ == "__main__":

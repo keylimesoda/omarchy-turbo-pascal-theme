@@ -1,0 +1,260 @@
+@import url("resource:///org/gtk/libgtk/theme/Adwaita/gtk-contained-dark.css");
+
+@define-color theme_bg_color #aaaaaa;
+@define-color theme_fg_color #000000;
+@define-color theme_base_color #aaaaaa;
+@define-color theme_text_color #000000;
+@define-color theme_selected_bg_color #00aa00;
+@define-color theme_selected_fg_color #ffffff;
+@define-color theme_unfocused_bg_color #aaaaaa;
+@define-color theme_unfocused_fg_color #000000;
+@define-color theme_unfocused_base_color #aaaaaa;
+@define-color theme_unfocused_text_color #000000;
+@define-color theme_unfocused_selected_bg_color #008800;
+@define-color theme_unfocused_selected_fg_color #ffffff;
+@define-color borders #ffffff;
+@define-color dos_blue #0000aa;
+@define-color dos_white #ffffff;
+@define-color button_green #008800;
+@define-color dos_cyan #00aaaa;
+@define-color dos_red #aa0000;
+
+* {
+  border-radius: 0;
+  text-shadow: none;
+  -gtk-icon-shadow: none;
+}
+
+window,
+.background,
+headerbar,
+toolbar,
+menubar,
+menu,
+.titlebar {
+  background-color: @theme_bg_color;
+  background-image: none;
+  color: @theme_fg_color;
+}
+
+entry {
+  background-color: @dos_blue;
+  background-image: none;
+  color: @dos_white;
+  border-color: @borders;
+  box-shadow: inset 1px 1px #000000;
+  caret-color: @dos_white;
+}
+
+textview text {
+  background-color: @dos_blue;
+  color: @dos_white;
+}
+
+treeview.view {
+  background-color: @dos_cyan;
+  color: #000000;
+}
+
+frame > border {
+  border: 3px double @borders;
+}
+
+menu {
+  border: 1px solid #000000;
+  box-shadow: 4px 4px #000000;
+}
+
+tooltip,
+tooltip.background,
+tooltip label,
+tooltip.background label {
+  background-color: @theme_bg_color;
+  background-image: none;
+  color: @theme_fg_color;
+  text-shadow: none;
+}
+
+tooltip,
+tooltip.background {
+  border: 1px solid @borders;
+  border-radius: 0;
+  box-shadow: 2px 2px #000000;
+}
+
+headerbar,
+notebook > header {
+  background-color: @theme_bg_color;
+  background-image: none;
+  border-color: @borders;
+}
+
+headerbar .title,
+headerbar .subtitle,
+.titlebar .title,
+.titlebar .subtitle,
+dialog grid > label:not(.error),
+dialog frame > label:not(.error),
+messagedialog grid > label:not(.error),
+messagedialog frame > label:not(.error) {
+  color: @dos_white;
+}
+
+notebook > header tab:checked {
+  background-color: @button_green;
+  color: @dos_white;
+}
+
+menuitem:hover,
+menu menuitem:hover,
+.menu menuitem:hover,
+.context-menu menuitem:hover,
+menubar > menuitem:hover,
+.menubar > menuitem:hover {
+  background-color: @button_green;
+  background-image: none;
+  color: #000000;
+  box-shadow: none;
+}
+
+row:selected {
+  background-color: @dos_blue;
+  color: @dos_white;
+}
+
+button {
+  background-color: @button_green;
+  background-image: none;
+  color: @dos_white;
+  border: 1px solid @borders;
+  box-shadow: 2px 2px #000000;
+}
+
+button:hover {
+  background-color: #007700;
+}
+
+button:checked {
+  background-color: #006600;
+  box-shadow: inset 2px 2px #003300;
+}
+
+button:active {
+  background-color: #005500;
+  box-shadow: inset 2px 2px #003300;
+}
+
+button.destructive-action,
+button.destructive-action:hover,
+button.destructive-action:checked,
+button.destructive-action:active {
+  background-color: @dos_red;
+  background-image: none;
+  color: @dos_white;
+  border: 1px solid @borders;
+  box-shadow: 2px 2px #000000;
+  text-shadow: none;
+  -gtk-icon-shadow: none;
+}
+
+button.destructive-action:hover {
+  background-color: #880000;
+}
+
+button.destructive-action:checked,
+button.destructive-action:active {
+  background-color: #660000;
+  box-shadow: inset 2px 2px #330000;
+}
+
+button:disabled,
+button.destructive-action:disabled,
+button.destructive-action:disabled:active,
+button.destructive-action:disabled:checked {
+  background-color: #888888;
+  background-image: none;
+  color: #555555;
+  box-shadow: none;
+  text-shadow: none;
+  -gtk-icon-shadow: none;
+}
+
+entry.error,
+entry.error:focus {
+  border-color: @dos_red;
+  color: @dos_white;
+  caret-color: @dos_white;
+  box-shadow: inset 1px 1px #000000;
+}
+
+label.error {
+  color: @dos_red;
+}
+
+infobar.error,
+infobar.error > revealer > box,
+infobar.error:backdrop > revealer > box {
+  background-color: @dos_red;
+  background-image: none;
+  color: @dos_white;
+}
+
+infobar.error label,
+infobar.error > revealer > box label,
+infobar.error:backdrop > revealer > box label {
+  color: @dos_white;
+}
+
+check,
+radio,
+switch {
+  background-color: @dos_cyan;
+  background-image: none;
+  color: #000000;
+  border: 1px solid #000000;
+}
+
+check:checked,
+radio:checked,
+switch:checked {
+  background-color: @dos_cyan;
+  background-image: none;
+  color: @dos_white;
+}
+
+scrollbar trough,
+scale trough,
+progressbar trough {
+  background-color: @dos_cyan;
+  background-image: none;
+  border: 1px solid @dos_blue;
+}
+
+scrollbar slider,
+scrollbar button,
+scale slider {
+  background-color: @dos_blue;
+  background-image: none;
+  color: @dos_cyan;
+  border: 1px solid @dos_cyan;
+  box-shadow: none;
+}
+
+scale highlight,
+progressbar progress {
+  background-color: @dos_blue;
+  background-image: none;
+}
+
+selection {
+  background-color: @theme_selected_bg_color;
+  color: @theme_selected_fg_color;
+}
+
+entry selection,
+entry.error selection,
+textview text selection,
+treeview.view:selected {
+  background-color: #aaaaaa;
+  color: @dos_blue;
+}
