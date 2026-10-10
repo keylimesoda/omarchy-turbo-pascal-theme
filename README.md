@@ -1,228 +1,157 @@
 # Turbo Pascal Theme for Omarchy
 
-An Omarchy theme inspired by Turbo Pascal's DOS IDE.
+DOS-blue workspaces, gray dialogs, green buttons and double-white frames,
+inspired by Turbo Pascal's DOS IDE.
 
-DOS-blue workspaces, gray dialogs, green buttons, and **double-white borders**.  Base colors in the theme, with a companion installer that brings the window and widget frames along for the ride.
+![Turbo Pascal theme with terminals, a browser and a gray battery panel](docs/in-use.png)
 
-![Turbo Pascal Theme for Omarchy running on a real desktop with terminals, a browser, a gray status bar, and the battery panel](docs/in-use.png)
-
-An actual desktop in everyday use: DOS-blue terminals, the gray status bar and
-battery panel, green power-profile buttons, double-white focused-window borders,
-and dimmed, slightly transparent inactive windows.
+Version **2.0.0** · [Changes](CHANGELOG.md)
 
 ## Install
 
-**Theme:** colors, gray panels and seventeen wallpapers.
+Start with the colors and seventeen wallpapers:
 
 ```bash
 omarchy theme install https://github.com/keylimesoda/omarchy-turbo-pascal-theme.git
 ```
 
-**Optional extras:** double borders, styled widgets, GTK app theming and focus fades.
+For the full styling, review the theme's code, then remove its Git metadata and
+apply it again:
 
 ```bash
 cd ~/.config/omarchy/themes/turbo-pascal
-./install.sh
+rm -rf .git
+omarchy theme set turbo-pascal
 ```
 
-Extras include hyprland config settings for window attention behavior, double-white borders, and custom base system widgets. Strives for easy compatibility, and will ask permission if install encounters potential incompatibilities.
+That's it. The first application prepares the widgets, GTK styles and window
+borders in the background. Border compilation may take a little time. Run these
+commands as your desktop user, without sudo.
 
-Run without sudo.
+Omarchy skips executable theme files while `.git` is present. Removing it lets
+Omarchy load our Lua entry point, which starts the extras setup. It also removes
+this copy from `omarchy theme update`; use the update steps below.
 
-## Uninstall extras
+**Full styling requires Omarchy's Lua configuration**, tested with Omarchy
+4.0.4-1 and Hyprland 0.56.2 on x86_64 in an omabox desktop. Base colors remain
+available without Lua. Python 3 is required for extras. Only double window
+borders require Git, make, g++, pkg-config and matching Hyprland development
+headers. Missing tools or an incompatible border build skip that feature.
+No system packages are installed automatically.
 
-Run without sudo:
+## What's included
+
+The standard installation provides DOS-blue terminals, white text, yellow
+accents, cyan directory names, gray bar/menu/popup colors, browser tint where
+supported, and seventeen static 4K wallpapers. Normal ANSI green appears yellow;
+widget buttons have their own green colors.
+
+The full styling adds:
+
+- White / blue / white frames around focused windows; gray inactive borders.
+- Double-white widget frames, black shadows, and raised green buttons with
+  darker, recessed selections.
+- Gray GTK3, GTK4 and libadwaita dialogs and toolbars, DOS-blue inputs, cyan
+  lists, green buttons and red error accents.
+- 17% inactive dimming, a 97% opacity target for ordinary inactive windows, and
+  gentle 275 ms focus fades. Application opt-outs and fullscreen windows are
+  preserved.
+- Square corners for Super+O popped-out windows.
+
+Your selected bar, widget positions, options and unrelated plugins are kept.
+Existing custom widgets are kept too; the automatic setup only styles supported
+stock widgets. Missing widget icons aren't added. The menu can be styled without
+adding its icon. The widget clones use the next theme's colors when you switch
+away, while the GTK styles and our window-border plugin are deactivated.
+
+![Microsoft Edge using gray GTK chrome and a green menu selection](docs/edge-gtk.png)
+
+In Edge, choose **Settings → Appearance → Overall appearance → GTK** to use the
+GTK3 colors. Reopen GTK4 apps after changing themes; they load user CSS at startup.
+
+## Update
+
+With `.git` still present, use `omarchy theme update`, then reapply the theme.
+
+For a full installation, download a fresh copy and enable it again:
+
+```bash
+omarchy theme install https://github.com/keylimesoda/omarchy-turbo-pascal-theme.git
+cd ~/.config/omarchy/themes/turbo-pascal
+rm -rf .git
+omarchy theme set turbo-pascal
+```
+
+Back up any edits in the theme directory first: `omarchy theme install` replaces
+that directory. Changed extras are migrated automatically, including installs
+made with the previous extras-only `install.sh`. Previous backups are retained. Edited
+managed widget or runtime files stop the migration so your changes can be saved.
+
+## Remove extras
 
 ```bash
 cd ~/.config/omarchy/themes/turbo-pascal
 ./uninstall.sh
 ```
 
-This removes the extras and restores your previous shell and GTK theme settings.
-**The base theme stays installed.**
+This restores your shell and GTK settings, removes the companion files and
+disables automatic setup. The base theme stays installed. Later widget positions
+and options are preserved. Edited managed files stop removal before files are
+removed; back up those edits and restore the installed versions, then retry.
 
-## What's included
+To turn full styling back on, reapply Turbo Pascal and run:
 
-### Base theme
+```bash
+python3 -B ~/.config/omarchy/themes/turbo-pascal/extras/activate.py --enable
+```
 
-- Terminal and application palettes: DOS blue, white text, yellow emphasis and
-  cyan directory names. Normal ANSI green appears yellow; widget buttons keep
-  their own green fills.
-- Gray bar, popup and menu colors, plus supported shell control colors/states.
-- Gray browser tint where Omarchy's browser color policy is supported.
-  Edge uses the optional GTK3 styling instead.
-- Ordinary white focused-window borders and gray inactive-window borders.
-- Seventeen static 4K wallpapers: IDE workspaces, Pascal source, a DOS prompt,
-  text-mode scenery, mathematical geometry, and a DOS-colored Omarchy logo.
-  No animations or additional wallpaper renderer.
+Installations from the earliest installer also owned the base-theme directory.
+Remove those extras with their original uninstaller before downloading an update.
 
-Omarchy generates the application configs from `colors.toml` and
-`shell.*.toml`. Custom widgets receive the colors they support, not an automatic
-redesign.
+## If setup needs attention
 
-### Optional extras
+The setup log is `~/.local/state/omarchy/turbo-pascal-extras.log`. Border and GTK
+status is in `~/.local/share/omarchy-turbo-pascal/runtime-status.json`.
+A failed setup stops retrying on each reload. Fix the reported problem and use
+the `--enable` command above to retry. It also retries previously skipped extras
+when their missing prerequisites become available.
 
-- **White / blue / white focused-window frames.** Inactive windows retain a
-  single gray border.
-- Double-white widget frames, black text on gray panels and crisp black shadows.
-- Raised green buttons with white labels; selected buttons are darker and
-  recessed.
-- Styled menus with gray panels and green selections.
-- **GTK app theming (GTK3, GTK4 and libadwaita):** gray dialogs and toolbars,
-  DOS-blue inputs and editors, cyan lists and cyan/blue scrollbars, white titles
-  and frames, green buttons, black shadows, and sparse red error/destructive-action
-  accents.
-- 17% inactive dimming and a 97% compositor-opacity target for ordinary inactive
-  windows, without another opacity multiplier. Application opt-outs, fullscreen
-  windows, intrinsic transparency and later user rules are preserved.
-- Gentle 275 ms ease-out fades for opacity and dimming, without bounce or
-  desaturation. Other window and workspace animations keep Omarchy's defaults.
-- Square corners for **Super+O** popped-out windows, overriding Omarchy's rounded
-  pop-window rule while Turbo Pascal's native focus styling is active.
+The border plugin is built locally from the official
+[borders-plus-plus](https://github.com/hyprwm/hyprland-plugins/tree/v0.56.0/borders-plus-plus)
+source, with our focused-window patch. The 0.56 source is pinned to commit
+`7644cecdb947060682891a0db2a0cdc5c0b9e704`. Compositor and header/dependency ABI
+checks stay enabled; no precompiled plugin is shipped. Unsupported upgrades can
+skip borders while the other styling remains available.
 
-![Microsoft Edge using Turbo Pascal's gray GTK browser chrome and a green Downloads menu highlight](docs/edge-gtk.png)
-
-Edge in GTK appearance mode, with gray browser chrome and a green menu highlight.
-Select **Settings → Appearance → Overall appearance → GTK** to use the app
-colors. Website contents are unchanged.
-
-[Native GTK3 control preview](docs/gtk-apps.png)
-
-## Optional extension
-
-<details>
-<summary>Extension details: requirements, files and removal</summary>
-
-Install the theme first. The commands above add the optional extension.
-
-**Tested baseline: Omarchy 4.0.4-1 and Hyprland 0.56.2.**
-The installer also attempts compatible extras on Omarchy 4.x with Hyprland
-0.52–0.56, using native Lua or legacy `.conf` output. Earlier-version syntax has
-been checked against upstream source, not tested on those desktops. Double
-borders have narrower compatibility than native focus effects.
-
-| Option | Meaning |
-|---|---|
-| `--check` | Read-only prerequisite check; does not build or ask to replace widgets |
-| `--allow-untested` | Try other versions; never bypass compositor/header ABI checks |
-| `--skip-widgets` | Keep your existing widgets |
-| `--skip-borders` | Omit the compiled window-border plugin |
-| `--skip-focus` | Keep existing opacity, dimming, focus animations and popped-window corners |
-| `--skip-gtk` | Keep existing GTK application and browser styling |
-| `--skip-gtk4` | Skip only GTK4/libadwaita styling |
-
-Pass options to `./install.sh`; they can be combined.
-
-The extension activates the theme if necessary and restarts the shell.
-It does not copy, overwrite or own the installed base theme. Do **not** use sudo.
-It needs Python 3. Only double borders need Git, GNU make, g++, pkg-config and
-matching development packages. A missing tool or failed border build does not
-block widgets or focus effects. It never installs system packages or changes
-`/usr/share/omarchy`.
-
-The double border uses a small patch to the official
-[`borders-plus-plus`](https://github.com/hyprwm/hyprland-plugins/tree/v0.56.0/borders-plus-plus)
-plugin. The 0.56 source is pinned to upstream commit
-`7644cecdb947060682891a0db2a0cdc5c0b9e704`; other versions attempt a matching
-upstream tag. A patch/build failure skips double borders. The running
-compositor commit and available ABI hash must match the installed headers and
-dependencies; no precompiled plugin binary is distributed.
-
-### What the installer changes
+## Files and backups
 
 | Location | Purpose |
 |---|---|
-| `~/.config/omarchy/plugins/turbo-pascal.*/` | User-owned widget clones and shared styling library |
-| `~/.config/omarchy/shell.json` | Switch existing supported widgets to those clones; keep the selected bar |
-| `~/.config/omarchy/hooks/{theme-set,post-boot}.d/turbo-pascal-borders` | Theme-aware GTK styling, focus effects and border loading |
-| `~/.local/share/omarchy-turbo-pascal/` | GTK selection helper, focus settings, border source, locally built plugin and runtime status |
-| `~/.local/share/themes/omarchy-turbo-pascal/` | Optional GTK3 theme, selected only while Turbo Pascal is active |
-| `~/.config/gtk-4.0/gtk.css` | Owned GTK4/libadwaita CSS import while Turbo Pascal is active; existing CSS is preserved |
-| `~/.local/state/omarchy/turbo-pascal-install/` | Installation record and backups |
+| `~/.config/omarchy/plugins/turbo-pascal.*/` | Styled widget clones and their shared QML library |
+| `~/.config/omarchy/shell.json` | Enable the styled stock widgets |
+| `~/.config/omarchy/hooks/{theme-set,post-boot}.d/turbo-pascal-borders` | Apply or restore extras on theme changes and login |
+| `~/.local/share/omarchy-turbo-pascal/` | Runtime helpers, border source/build and status |
+| `~/.local/share/themes/omarchy-turbo-pascal/` | GTK3 theme |
+| `~/.config/gtk-4.0/gtk.css` | Reversible GTK4 import alongside existing CSS |
+| `~/.local/state/omarchy/turbo-pascal-install/` | Installation records and backups |
 
-Existing widget positions, options, unrelated plugins, and idle settings are
-preserved. Missing widget icons are not added; the menu service can still be
-styled without an icon. Custom components are kept unless you approve replacing
-them with stock-based styled clones. Their original files stay; their custom
-behavior does not transfer. Existing target files require permission and are
-backed up. Your transparent-bar setting is left alone.
-
-The stock bar is themed through `shell.bar.toml`, not replaced. This preserves
-third-party widgets' service access under the stock bar, including Sandman and
-OmaSettings. A bar you selected yourself is also left unchanged. The
-`turbo-pascal.bar/DosUi/` directory is only a shared widget styling library;
-the installer does not copy its bar engine or register a replacement bar.
-
-GTK styling covers GTK3 browsers/apps and GTK4/libadwaita apps. GTK3 uses a named
-Adwaita-dark theme; GTK4 4.16+ uses a backed-up, reversible import in user CSS.
-Existing styles and later edits are preserved; system light/dark mode is unchanged.
-Theme switches and uninstall remove our selection/import. GTK4 apps cache user
-CSS at startup, so reopen them after theme changes. Existing GTK3 theme files or
-conflicting GTK4 imports skip only the affected GTK extra.
-The control colors follow the
-[Turbo Pascal screenshot references](https://ilyabirman.net/meanwhile/all/ui-museum-turbo-pascal-7-1/),
-with the existing theme's darker green/white-label button treatment retained.
-Red accents mark errors and destructive actions, rather than individual menu
-mnemonic letters, which GTK CSS cannot reliably target.
-
-An existing `borders-plus-plus` installation skips our window borders, not the
-other extras. Conflicting hooks/runtime files and symlinked installation targets
-stop installation rather than being overwritten.
-
-Omarchy intentionally omits executable Lua from themes installed through Git.
-The explicitly authorized companion hook appends only enabled native effects
-to the generated theme; it preserves Omarchy's base output. Focus effects do not
-need the compiled border plugin. Switching away removes the native overlay and
-unloads only this installation's border plugin; shell clones remain installed
-and fall back to the next theme's normal palette.
-
-### Removal and updates
-
-Uninstall restores shell and GTK settings, removes our GTK4 CSS import, and
-removes the owned plugins, GTK theme, hooks and border runtime. The base theme
-stays installed; if active, Omarchy reapplies its standard appearance. Later
-bar-layout and widget-option edits are kept. Previously selected custom
-components are restored when still applicable.
-
-Edited extension/plugin files stop removal before more files are removed;
-back up your edits and restore the installed files first. Backups are retained.
-If removal fails, fix the reported problem and run `./uninstall.sh` again.
-For an update, uninstall, pull the repository, then install again; the previous
-backup record is archived automatically.
-
-If an older extras install selected `turbo-pascal.bar`, follow that update
-sequence to restore your previous bar and install the widget-only enhancements.
-
-Older companion installations also managed base-theme files; their saved
-installation records retain the original restore behavior. Uninstall those
-before installing the base theme through the standard Omarchy command.
-
-After compositor upgrades, borders rebuild only when headers/dependencies
-match; build/load failures are reported and skipped. See
-`~/.local/share/omarchy-turbo-pascal/runtime-status.json` for native-effect
-status. Shell clones are snapshots and do not automatically track upstream
-changes. Tests use isolated fixtures; a clean-machine installation and actual
-reboot persistence have not yet been verified.
-
-The 97% target applies only to inactive, non-fullscreen windows carrying
-Omarchy's `default-opacity` tag. It preserves application opt-outs and does not
-eliminate transparency drawn inside an application. Excessive transparency on
-the other machine remains undiagnosed. Neither installation configures Copilot
-CLI, changes your font, or modifies your terminal command.
-
-</details>
+Conflicting files and custom components are preserved. Nothing under
+`/usr/share/omarchy` is changed. GTK light/dark mode, fonts and terminal launch
+commands are left to your existing settings. Shell clones are snapshots of the
+supported shell; they don't automatically absorb upstream widget changes.
 
 ## Development
 
 ```bash
-python3 -m unittest discover -s tests -v
+omabox run -- python3 -B -m unittest discover -s tests -v
 bash -n install.sh uninstall.sh extras/borders/apply-borders \
   extras/borders/turbo-pascal-borders
 ```
 
-Installer tests use a temporary home and simulated desktop commands; they do
-not alter a running desktop. The plugin patch must also be built against the
-supported Hyprland headers before releasing changes.
+The suite includes temporary-home lifecycle fixtures and native GTK rendering
+checks. Run it in a disposable desktop. Release checks cover Git installation,
+trusted activation, repeated reloads, updates, theme switching and removal;
+physical hardware, older desktops and an actual machine reboot aren't covered.
 
 ## Wallpapers
 

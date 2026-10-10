@@ -20,7 +20,7 @@ class BorderHookTests(unittest.TestCase):
         for name in ("runtime.py", "focus.conf", "client-hash.cpp"):
             shutil.copy2(ROOT / "extras/borders" / name, self.data)
         shutil.copy2(ROOT / "extras/gtk/gtk.py", self.data)
-        shutil.copy2(ROOT / "hyprland.lua", self.data)
+        shutil.copy2(ROOT / "extras/borders/focus.lua", self.data / "hyprland.lua")
         self.features()
         self.current = self.home / ".local/state/omarchy/current"
         (self.current / "theme").mkdir(parents=True)

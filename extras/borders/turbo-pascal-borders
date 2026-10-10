@@ -1,4 +1,11 @@
 #!/bin/bash
-# Omarchy theme-set and post-boot entry point.
+# Reconcile a trusted theme after app retints, or restore GTK/borders on departure.
 set -euo pipefail
-exec bash "$HOME/.local/share/omarchy-turbo-pascal/apply-borders" "$@"
+current="$HOME/.local/state/omarchy/current/theme"
+disabled="$HOME/.local/state/omarchy/turbo-pascal-disabled"
+if [[ ! -f $disabled && -f $current/extras/activate.py ]] &&
+   [[ $(cat "$HOME/.local/state/omarchy/current/theme.name") == turbo-pascal ]] &&
+   grep -q '^-- TURBO PASCAL AUTOMATIC EXTRAS$' "$current/hyprland.lua"; then
+  exec python3 -B "$current/extras/activate.py" --hook
+fi
+exec bash "$HOME/.local/share/omarchy-turbo-pascal/apply-borders" --unload

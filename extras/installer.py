@@ -112,7 +112,8 @@ def wait_shell():
 class Installer:
     def __init__(self, home=None, package=PACKAGE, allow_untested=False,
                  skip_widgets=False, skip_borders=False, skip_focus=False, skip_gtk=False,
-                 skip_gtk4=False, confirm=None):
+                 skip_gtk4=False, confirm=None, automatic=False):
+        self.automatic = automatic
         self.home = (home or Path.home()).resolve()
         self.package = package
         self.config = self.home / ".config/omarchy"
@@ -184,7 +185,12 @@ class Installer:
         for command in ("omarchy", "hyprctl", "bash"):
             if not shutil.which(command):
                 raise RuntimeError(f"Missing dependency: {command}")
-        version = run("omarchy", "version", capture=True)
+        try:
+            version = run("omarchy", "version", capture=True)
+        except subprocess.CalledProcessError:
+            # Disposable desktops may omit the pacman database.
+            root = Path(os.environ.get("OMARCHY_PATH", "/usr/share/omarchy"))
+            version = (root / "version").read_text().strip()
         self.compositor = read_json_text(run("hyprctl", "version", "-j", capture=True))
         match = re.match(r"v?(\d+)\.(\d+)\.", self.compositor["version"])
         known = (version.startswith("4.") and match
@@ -357,7 +363,7 @@ class Installer:
             data_record = self.snapshot(self.data, runtime=True)
             self.data.mkdir(parents=True)
             shutil.copy2(self.package / "extras/borders/apply-borders", self.data)
-            shutil.copy2(self.package / "hyprland.lua", self.data)
+            shutil.copy2(self.package / "extras/borders/focus.lua", self.data / "hyprland.lua")
             for name in ("runtime.py", "focus.conf", "client-hash.cpp"):
                 shutil.copy2(self.package / "extras/borders" / name, self.data)
             shutil.copy2(self.package / "extras/gtk/gtk.py", self.data)
@@ -442,7 +448,7 @@ class Installer:
                 if not target.is_file():
                     raise RuntimeError(f"The hook was not installed: {target}")
                 self.finish_record(record)
-            if (self.current / "theme.name").read_text().strip() != "turbo-pascal":
+            if not self.automatic and (self.current / "theme.name").read_text().strip() != "turbo-pascal":
                 run("omarchy", "theme", "set", "turbo-pascal")
                 if (self.current / "theme.name").read_text().strip() != "turbo-pascal":
                     raise RuntimeError("Omarchy did not activate Turbo Pascal; restoring the previous settings.")
@@ -602,6 +608,8 @@ class Installer:
             self.save()
 
     def refresh_theme_for_cleanup(self, theme):
+        if self.automatic:
+            return
         try:
             run("omarchy", "theme", "set", theme)
         finally:

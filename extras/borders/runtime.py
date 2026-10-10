@@ -35,9 +35,10 @@ plugin:borders-plus-plus:col.border_2 = rgb(ffffff)
 
 
 def run(*args):
-    result = subprocess.run(args, check=True, capture_output=True, text=True)
+    result = subprocess.run(args, capture_output=True, text=True)
     if result.stderr:
         print(result.stderr, file=sys.stderr, end="")
+    result.check_returncode()
     return result.stdout.strip()
 
 
