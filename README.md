@@ -5,7 +5,7 @@ inspired by Turbo Pascal's DOS IDE.
 
 ![Turbo Pascal theme with terminals, a browser and a gray battery panel](docs/in-use.png)
 
-Version **2.0.0** · [Changes](CHANGELOG.md)
+Version **2.0.1** · [Changes](CHANGELOG.md)
 
 ## Install
 

@@ -1,5 +1,14 @@
 # Changes
 
+## 2.0.1
+
+- Ship `shell.toml` so `omarchy theme refresh` cannot retint the bar from
+  `colors.toml`. Omarchy 4.5 generates white on DOS blue, then overlays
+  `shell.bar.toml`; if that overlay is skipped the Quickshell bar loses VGA
+  gray chrome and black text. The shipped file and `shell.bar.toml` both keep
+  `[bar]` at `#AAAAAA` / `#000000`. Menu, launcher, and popup cards stay
+  black on gray.
+
 ## 2.0.0
 
 Full styling now starts automatically after you remove the installed theme's
