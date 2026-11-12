@@ -1,0 +1,150 @@
+# Turbo Pascal shell surfaces. Shipped so `omarchy theme refresh` cannot
+# replace [bar] from colors.toml (white on DOS blue). VGA-gray chrome,
+# black text. Matching shell.*.toml files overlay the same tables.
+
+[bar]
+background = "#AAAAAA"
+background-alpha = 1.0
+text = "#000000"
+active = "#AA0000"
+open-panel-indicator = "#00AA00"
+scale-with-font = true
+size-horizontal = 26
+size-vertical = 28
+
+[hyprland]
+active-border            = "rgba(ffffffff)"
+active-border-foreground = "rgba(ffffffff)"
+
+[controls]
+# Resolve against each control's foreground, not the terminal's yellow text.
+normal-color = "foreground"
+normal-fill-alpha = 0.04
+normal-border-width = 1
+normal-border-alpha = 0.8
+
+hover-cursor-color = "foreground"
+hover-cursor-fill-alpha = 0.08
+hover-cursor-border-width = 1
+hover-cursor-border-alpha = 1.0
+
+focus-color = "foreground"
+focus-fill-alpha = 0.08
+focus-border-width = 1
+focus-border-alpha = 1.0
+
+selected-color = "foreground"
+selected-fill-alpha = 0.18
+selected-border-width = 1
+selected-border-alpha = 1.0
+
+pressed-fill-alpha = 0.22
+selection-fill-alpha = 0.35
+
+[spacing]
+scale = 1.0
+scale-with-font = true
+
+[font]
+base-size = 12
+
+[popups]
+background = "#AAAAAA"
+background-alpha = 1.0
+text = "#000000"
+border = "#FFFFFF"
+border-alpha = 1.0
+border-width = 1
+inner-border = "#FFFFFF"
+inner-border-gap = 1
+button-background = "#008800"
+button-text = "#FFFFFF"
+button-hover-background = "#007700"
+button-selected-background = "#006600"
+button-pressed-background = "#005500"
+button-shadow-color = "#000000"
+button-shadow-offset = 2
+button-inset-shadow-color = "#003300"
+shadow-color = "#000000"
+shadow-offset = 4
+
+[tooltip]
+background       = "#0000AA"
+background-alpha = 0.97
+text             = "#FFFFFF"
+border           = "hyprland.active-border-foreground"
+border-alpha     = 1.0
+
+[notifications]
+background       = "#0000AA"
+background-alpha = 1.0
+text             = "#FFFFFF"
+border           = "hyprland.active-border"
+border-alpha     = 1.0
+countdown        = "#55FFFF"
+
+[launcher]
+background = "#AAAAAA"
+background-alpha = 1.0
+text = "#000000"
+border = "#000000"
+border-alpha = 1.0
+border-width = 1
+shadow-color = "#000000"
+shadow-offset = 4
+scrim = "#000066"
+scrim-alpha = 0.5
+selected-background = "#00AA00"
+selected-background-alpha = 1.0
+selected-text = "#000000"
+selected-border = "#00AA00"
+selected-border-alpha = 1.0
+
+[menu]
+background = "#AAAAAA"
+background-alpha = 1.0
+text = "#000000"
+border = "#000000"
+border-alpha = 1.0
+border-width = 1
+shadow-color = "#000000"
+shadow-offset = 4
+scrim = "#000066"
+scrim-alpha = 0.5
+selected-background = "#00AA00"
+selected-background-alpha = 1.0
+selected-text = "#000000"
+selected-border = "#00AA00"
+selected-border-alpha = 1.0
+
+[polkit]
+background       = "#0000AA"
+background-alpha = 1.0
+text             = "#FFFFFF"
+text-error       = "#FF5555"
+border           = "hyprland.active-border"
+border-error     = "#FF5555"
+border-alpha     = 1.0
+scrim            = "#0000AA"
+scrim-alpha      = 0.5
+accent           = "#55FFFF"
+
+[lock]
+background       = "#0000AA"
+background-alpha = 0.8
+text             = "#FFFFFF"
+placeholder      = "#a8a8e2"
+text-error       = "#FF5555"
+border           = "hyprland.active-border"
+border-active    = "hyprland.active-border"
+border-error     = "#FF5555"
+border-alpha     = 1.0
+selection        = "#55FFFF"
+selection-alpha  = 0.45
+
+[image-picker]
+text                    = "#FFFFFF"
+selected-border         = "#55FFFF"
+selected-border-alpha   = 1.0
+unselected-border       = "#FFFFFF"
+unselected-border-alpha = 0.28
